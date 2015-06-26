@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="gnome-shell-extensions">
+
+  <schema path="/org/gnome/shell/extensions/howdoi/" id="org.gnome.shell.extensions.howdoi">
+
+    <key type="as" name="show-howdoi">
+      <default><![CDATA[['F4']]]></default>
+    </key>
+
+    <key type="b" name="enable-animations">
+        <default>true</default>
+    </key>
+
+    <key type="i" name="dialog-width-percents">
+        <default>85</default>
+    </key>
+
+    <key type="i" name="dialog-height-percents">
+        <default>70</default>
+    </key>
+
+  </schema>
+</schemalist>

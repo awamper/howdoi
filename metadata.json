@@ -1,0 +1,11 @@
+{
+  "description":  "Instant coding answers. Press <F4> to toggle dialog.\nInspired by https://github.com/gleitz/howdoi",
+  "name": "HowDoI",
+  "shell-version": [
+    "3.16"
+  ],
+  "url": "https://github.com/awamper/howdoi",
+  "uuid": "howdoi@awamper.gmail.com",
+  "settings-schema": "org.gnome.shell.extensions.howdoi",
+  "version": 0
+}
