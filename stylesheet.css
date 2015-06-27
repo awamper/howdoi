@@ -53,3 +53,34 @@
 .howdoi-control-button:hover {
     color: white;
 }
+
+.howdoi-suggestions-dialog {
+    background-color: rgba(49, 49, 49, 0.8);
+    border: 1px solid rgba(154, 154, 142, 0.5);
+}
+
+.howdoi-entry-suggestion-item-box {
+    color: white;
+}
+
+.howdoi-entry-suggestion-item-box:hover {
+    background-color: #215d9c;
+    transition-duration: 200ms;
+}
+
+.howdoi-entry-suggestion-item-box:selected {
+    background-color: #0D4CA3;
+    transition-duration: 200ms;
+}
+
+.howdoi-entry-suggestion-item-box:inactive {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.howdoi-entry-suggestion-item-button {
+    font-size: 25px;
+    padding-left: 5px;
+    padding-top: 2px;
+    padding-right: 5px;
+    padding-bottom: 2px;
+}

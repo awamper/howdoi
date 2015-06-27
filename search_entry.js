@@ -22,6 +22,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
+const GoogleEntrySuggestions = Me.imports.google_entry_suggestions;
 
 const SearchEntry = new Lang.Class({
     Name: 'HowDoISeachEntry',
@@ -54,6 +55,9 @@ const SearchEntry = new Lang.Class({
             visible: false
         });
         this.actor.set_secondary_icon(this._secondary_icon);
+
+        this._google_entry_suggestions =
+            new GoogleEntrySuggestions.GoogleEntrySuggestions(this.actor);
     },
 
     _on_text_changed: function() {
@@ -92,11 +96,12 @@ const SearchEntry = new Lang.Class({
     },
 
     destroy: function() {
+        this._google_entry_suggestions.destroy();
         this._secondary_icon.destroy();
         this.actor.destroy();
     },
 
     get text() {
-        return this.actor.get_text();
+        return !this.is_empty() ? this.actor.get_text() : '';
     }
 });

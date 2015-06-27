@@ -19,5 +19,21 @@
         <default>70</default>
     </key>
 
+    <key type="s" name="google-suggestions-url">
+        <default><![CDATA['https://suggestqueries.google.com/complete/search?client=chrome&q=%s']]></default>
+    </key>
+
+    <key type="i" name="max-google-suggestions">
+        <default>5</default>
+    </key>
+
+    <key type="i" name="suggestions-timeout">
+        <default>100</default>
+    </key>
+
+    <key type="i" name="suggestions-cache-limit">
+        <default>500</default>
+    </key>
+
   </schema>
 </schemalist>

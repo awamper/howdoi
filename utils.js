@@ -18,11 +18,20 @@
 const Gio = imports.gi.Gio;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Clutter = imports.gi.Clutter;
+const Soup = imports.gi.Soup;
 
 const SPINNER_ICON = global.datadir + '/theme/process-working.svg';
 const SPINNER_ICON_SIZE = 24;
 
 const SETTINGS = getSettings();
+
+const HTTP_SESSION = new Soup.SessionAsync();
+Soup.Session.prototype.add_feature.call(
+    HTTP_SESSION,
+    new Soup.ProxyResolverDefault()
+);
+HTTP_SESSION.user_agent = 'GNOME Shell HowDoI Extension';
+HTTP_SESSION.timeout = 1;
 
 function launch_extension_prefs(uuid) {
     const Shell = imports.gi.Shell;
@@ -106,6 +115,18 @@ function is_pointer_inside_actor(actor, x, y) {
     }
 
     return result;
+}
+
+function is_empty_entry(entry) {
+    if(
+        is_blank(entry.text) ||
+        entry.text === entry.hint_text
+    ) {
+        return true
+    }
+    else {
+        return false;
+    }
 }
 
 // 32 bit FNV-1a hash

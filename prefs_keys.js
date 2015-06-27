@@ -19,3 +19,7 @@ const SHOW_HOWDOI = 'show-howdoi';
 const ENABLE_ANIMATIONS = 'enable-animations';
 const DIALOG_WIDTH_PERCENTS = 'dialog-width-percents';
 const DIALOG_HEIGHT_PERCENTS = 'dialog-height-percents';
+const GOOGLE_SUGGESTIONS_URL = 'google-suggestions-url';
+const MAX_GOOGLE_SUGGESTIONS = 'max-google-suggestions';
+const SUGGESTIONS_TIMEOUT = 'suggestions-timeout';
+const SUGGESTIONS_CACHE_LIMIT = 'suggestions-cache-limit'
