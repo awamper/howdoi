@@ -193,6 +193,11 @@ const GoogleEntrySuggestions = new Lang.Class({
 
     _on_entry_key_press: function(sender, event) {
         let symbol = event.get_key_symbol();
+        let is_enter = (
+            symbol === Clutter.KEY_Return ||
+            symbol === Clutter.KEY_KP_Enter ||
+            symbol === Clutter.KEY_ISO_Enter
+        );
 
         if(symbol === Clutter.Up) {
             this.select_prev();
@@ -204,9 +209,10 @@ const GoogleEntrySuggestions = new Lang.Class({
         else if(Utils.symbol_is_tab(symbol)) {
             this.select_next();
         }
-        else if(symbol === Clutter.Return) {
+        else if(is_enter && (this.shown || this._showing)) {
             let selected = this.get_selected();
             if(selected) selected.activate();
+            return Clutter.EVENT_STOP;
         }
 
         return Clutter.EVENT_PROPOGATE;
@@ -216,6 +222,7 @@ const GoogleEntrySuggestions = new Lang.Class({
         this._ignore_text_change = true;
         this._entry.set_text(suggestion_item.suggestion.text);
         this.hide();
+        this.emit('activate');
     },
 
     _calculate_height: function() {
@@ -651,6 +658,7 @@ const GoogleEntrySuggestions = new Lang.Class({
         this.parent();
     }
 });
+Signals.addSignalMethods(GoogleEntrySuggestions.prototype);
 
 const GoogleSuggestionsCache = new Lang.Class({
     Name: 'GoogleSuggestionsCache',
