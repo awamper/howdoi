@@ -18,6 +18,7 @@
 const St = imports.gi.St;
 const Lang = imports.lang;
 const Clutter = imports.gi.Clutter;
+const Signals = imports.signals;
 const ExtensionUtils = imports.misc.extensionUtils;
 
 const Me = ExtensionUtils.getCurrentExtension();
@@ -42,6 +43,10 @@ const SearchEntry = new Lang.Class({
             'secondary-icon-clicked',
             Lang.bind(this, this.clear)
         );
+        this.actor.clutter_text.connect(
+            'activate',
+            Lang.bind(this, this._activate)
+        );
 
         let primary_icon = new St.Icon({
             style_class: 'howdoi-search-entry-icon',
@@ -58,6 +63,10 @@ const SearchEntry = new Lang.Class({
 
         this._google_entry_suggestions =
             new GoogleEntrySuggestions.GoogleEntrySuggestions(this.actor);
+        this._google_entry_suggestions.connect(
+            'activate',
+            Lang.bind(this, this._activate)
+        );
     },
 
     _on_text_changed: function() {
@@ -65,6 +74,10 @@ const SearchEntry = new Lang.Class({
         else this._secondary_icon.show();
 
         return Clutter.EVENT_STOP;
+    },
+
+    _activate: function() {
+        this.emit('activate');
     },
 
     is_empty: function() {
@@ -113,3 +126,4 @@ const SearchEntry = new Lang.Class({
         return this._google_entry_suggestions;
     }
 });
+Signals.addSignalMethods(SearchEntry.prototype);
