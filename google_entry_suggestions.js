@@ -162,19 +162,20 @@ const GoogleEntrySuggestions = new Lang.Class({
         this.actor.add_child(this._box);
 
         this._entry = entry;
-        this._entry.clutter_text.connect('key-press-event',
+        this._entry.clutter_text.connect(
+            'key-press-event',
             Lang.bind(this, this._on_entry_key_press)
         );
+        this._entry.clutter_text.connect(
+            'text-changed',
+            Lang.bind(this, this._on_text_changed)
+        );
+
         this._cache = new GoogleSuggestionsCache();
         this._suggestions = new GoogleSuggestions.GoogleSuggestions();
         this._suggestion_items = [];
         this._showing = false;
         this._ignore_text_change = false;
-
-        this._entry.clutter_text.connect(
-            'text-changed',
-            Lang.bind(this, this._on_text_changed)
-        );
 
         CONNECTION_IDS.ENABLE_CALCULATOR = Utils.SETTINGS.connect(
             'changed::' + PrefsKeys.ENABLE_CALCULATOR,
