@@ -29,6 +29,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const PrefsKeys = Me.imports.prefs_keys;
 const SearchEntry = Me.imports.search_entry;
+const AnswersView = Me.imports.answers_view;
 
 const CONNECTION_IDS = {
     CAPTURED_EVENT: 0
@@ -43,7 +44,8 @@ const HowDoI = new Lang.Class({
     _init: function() {
         this.actor = new St.BoxLayout({
             style_class: 'howdoi-main-box',
-            visible: false
+            visible: false,
+            vertical: true
         });
         this.actor.set_pivot_point(0.5, 0.5);
         this.actor.connect(
@@ -54,11 +56,20 @@ const HowDoI = new Lang.Class({
         this._search_entry = new SearchEntry.SearchEntry();
         this._search_entry.actor.hide();
         this.actor.add(this._search_entry.actor, {
-            expand: true,
+            expand: false,
             x_fill: true,
             x_align: St.Align.MIDDLE,
             y_fill: false,
             y_align: St.Align.START
+        });
+
+        this._answers_view = new AnswersView.AnswersView();
+        this.actor.add(this._answers_view.actor, {
+            expand: true,
+            x_fill: false,
+            y_fill: false,
+            x_align: St.Align.MIDDLE,
+            y_align: St.Align.MIDDLE
         });
 
         this._background_actor = new St.BoxLayout({
@@ -112,6 +123,13 @@ const HowDoI = new Lang.Class({
 
         this.actor.set_width(width);
         this.actor.set_height(height);
+
+        this._answers_view.actor.set_width(
+            Math.round(width * 0.8)
+        );
+        this._answers_view.actor.set_height(
+            Math.round((height - this._search_entry.actor.height) * 0.8)
+        );
     },
 
     _reposition: function() {
@@ -214,9 +232,9 @@ const HowDoI = new Lang.Class({
             ? Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_ANIMATIONS)
             : animation;
 
+        Main.uiGroup.add_child(this.actor);
         this._resize();
         this._reposition();
-        Main.uiGroup.add_child(this.actor);
 
         if(!animation) {
             this.actor.show();
@@ -224,14 +242,17 @@ const HowDoI = new Lang.Class({
             return;
         }
 
-        this._search_entry.actor.opacity = 0;
-        this._search_entry.actor.show();
-
         this.actor.set_pivot_point(0.5, 1.0);
         this.actor.scale_x = 0.01;
         this.actor.scale_y = 0.05;
         this.actor.opacity = 0;
         this.actor.show();
+
+        this._search_entry.actor.opacity = 0;
+        this._search_entry.actor.show();
+
+        this._answers_view.actor.set_scale(0.8, 0.8);
+        this._answers_view.actor.set_pivot_point(0.5, 0.5);
 
         Tweener.removeTweens(this.actor)
         Tweener.addTween(this.actor, {
@@ -249,6 +270,23 @@ const HowDoI = new Lang.Class({
             time: 0.8,
             opacity: 255,
             transition: 'easeOutQuad'
+        });
+
+        Tweener.removeTweens(this._answers_view.actor);
+        Tweener.addTween(this._answers_view.actor, {
+            delay: Math.round(SHOW_ANIMATION_TIME * 0.8),
+            time: 0.2,
+            scale_x: 1.1,
+            scale_y: 1.1,
+            transition: 'easeOutQuad',
+            onComplete: Lang.bind(this, function() {
+                Tweener.addTween(this._answers_view.actor, {
+                    time: 0.2,
+                    scale_x: 1,
+                    scale_y: 1,
+                    transition: 'easeOutQuad'
+                });
+            })
         });
     },
 
@@ -307,6 +345,7 @@ const HowDoI = new Lang.Class({
     destroy: function() {
         this._disconnect_captured_event();
         this._background_actor.destroy();
+        this._answers_view.destroy();
         this._search_entry.destroy();
         this.actor.destroy();
     },

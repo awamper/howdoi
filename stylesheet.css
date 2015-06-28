@@ -84,3 +84,11 @@
     padding-right: 5px;
     padding-bottom: 2px;
 }
+
+.howdoi-answers-view {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.howdoi-answer-view {
+    background-color: rgba(255, 0, 0, 0.5);
+}
