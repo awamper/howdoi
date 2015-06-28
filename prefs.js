@@ -351,6 +351,7 @@ const HowDoIPrefsWidget = new GObject.Class({
         this.set_orientation(Gtk.Orientation.VERTICAL);
 
         let main = this._get_main_page();
+        let size = this._get_size_page();
         let keybindings = this._get_keybindings_page();
 
         let stack = new Gtk.Stack({
@@ -366,6 +367,7 @@ const HowDoIPrefsWidget = new GObject.Class({
         });
 
         stack.add_titled(main.page, main.name, main.name);
+        stack.add_titled(size.page, size.name, size.name);
         stack.add_titled(keybindings.page, keybindings.name, keybindings.name);
 
         this.add(stack);
@@ -395,7 +397,16 @@ const HowDoIPrefsWidget = new GObject.Class({
             'Google Calculator:',
             PrefsKeys.ENABLE_CALCULATOR
         );
-        page.add_separator();
+
+        return {
+            page: page,
+            name: name
+        };
+    },
+
+    _get_size_page: function() {
+        let name = 'Dialog size';
+        let page = new PrefsGrid(Utils.SETTINGS);
 
         let range_properties = {
             min: 10,
@@ -404,12 +415,12 @@ const HowDoIPrefsWidget = new GObject.Class({
             size: 300
         };
         page.add_range(
-            'Dialog width (% of screen):',
+            'Width (% of screen):',
             PrefsKeys.DIALOG_WIDTH_PERCENTS,
             range_properties
         )
         page.add_range(
-            'Dialog height (% of screen):',
+            'Height (% of screen):',
             PrefsKeys.DIALOG_HEIGHT_PERCENTS,
             range_properties
         )
