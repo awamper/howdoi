@@ -197,7 +197,8 @@ const GoogleEntrySuggestions = new Lang.Class({
             this.select_prev();
         }
         else if(symbol === Clutter.Down) {
-            this.select_next();
+            if(this.shown) this.select_next();
+            else this.show();
         }
         else if(Utils.symbol_is_tab(symbol)) {
             this.select_next();
@@ -631,7 +632,6 @@ const GoogleEntrySuggestions = new Lang.Class({
                 this.actor.set_opacity(255);
                 this._hide_done();
                 this.shown = false;
-                this.clear();
             })
         });
     },
