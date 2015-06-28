@@ -49,7 +49,8 @@ const GoogleEntrySuggestionItem = new Lang.Class({
         this.actor = new St.BoxLayout({
             style_class: 'howdoi-entry-suggestion-item-box howdoi-entry-suggestion-item-button',
             reactive: reactive,
-            track_hover: reactive
+            track_hover: reactive,
+            vertical: false
         });
         this.actor.connect('key-release-event',
             Lang.bind(this, this._on_key_release)
@@ -63,9 +64,15 @@ const GoogleEntrySuggestionItem = new Lang.Class({
             text: this.suggestion.text
         });
         this.actor.add(this._label, {
-            expand: true,
+            expand: false,
             x_align: St.Align.START
         });
+
+        this._calc_result = new St.Label();
+        this.actor.add(this._calc_result, {
+            expand: true,
+            x_align: St.Align.START
+        })
     },
 
     _on_key_release: function(sender, event) {
@@ -92,6 +99,14 @@ const GoogleEntrySuggestionItem = new Lang.Class({
         }
     },
 
+    set_calc_result: function(text) {
+        let markup = '%s<span size="x-small"><i>%s</i></span>'.format(
+            /\s+$/.test(this.suggestion.text) ? '' : ' ',
+            text
+        );
+        this._calc_result.clutter_text.set_markup(markup);
+    },
+
     set_reactive: function(reactive) {
         this.actor.reactive = reactive;
         this.actor.track_hover = reactive;
@@ -105,6 +120,10 @@ const GoogleEntrySuggestionItem = new Lang.Class({
 
     destroy: function() {
         this.actor.destroy();
+    },
+
+    get has_calc_result() {
+        return !Utils.is_blank(this._calc_result.text);
     }
 });
 Signals.addSignalMethods(GoogleEntrySuggestionItem.prototype);
@@ -220,23 +239,21 @@ const GoogleEntrySuggestions = new Lang.Class({
         let first_suggestion = {
             text: this._entry.text,
             relevance: 9999999,
-            type: GoogleSuggestions.SUGGESTION_TYPE.QUERY
+            type: GoogleSuggestions.SUGGESTION_TYPE.QUERY,
+            calc_result: ''
         };
-        let select_index = 0;
 
-        if(suggestions[0].text !== first_suggestion.text) {
-            let insert_index = 0;
-
-            if(
-                suggestions[0].type ===
-                GoogleSuggestions.SUGGESTION_TYPE.CALCULATOR
-            ) {
-                insert_index = 1;
-                select_index = insert_index;
+        if(suggestions.length > 0 && suggestions[0].text !== first_suggestion.text) {
+            for each(let suggestion in suggestions) {
+                if(suggestion.type === GoogleSuggestions.SUGGESTION_TYPE.CALCULATOR) {
+                    first_suggestion.calc_result = suggestion.text;
+                    suggestions.splice(suggestions.indexOf(suggestion), 1);
+                    break;
+                }
             }
-
-            suggestions.splice(insert_index, 0, first_suggestion);
         }
+
+        suggestions.unshift(first_suggestion);
 
         for(let i = 0; i < suggestions.length; i++) {
             if(this._suggestion_items[i] !== undefined) {
@@ -257,11 +274,15 @@ const GoogleEntrySuggestions = new Lang.Class({
                     Lang.bind(this, this._on_suggestion_activate)
                 );
 
+                if(!Utils.is_blank(new_suggestion.calc_result)) {
+                    new_suggestion_item.set_calc_result(new_suggestion.calc_result);
+                }
+
                 if(i > 0 && Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_ANIMATIONS)) {
                     Tweener.removeTweens(old_suggestion_item.actor);
                     Tweener.addTween(old_suggestion_item.actor, {
                         time: 0.15,
-                        opacity: 50,
+                        opacity: 100,
                         transition: 'easeOutExpo',
                         onComplete: Lang.bind(this, function() {
                             this._box.replace_child(
@@ -292,6 +313,11 @@ const GoogleEntrySuggestions = new Lang.Class({
                 suggestion_item.connect('activate',
                     Lang.bind(this, this._on_suggestion_activate)
                 );
+
+                if(!Utils.is_blank(suggestions[i].calc_result)) {
+                    suggestion_item.set_calc_result(suggestions[i].calc_result);
+                }
+
                 this._suggestion_items.push(suggestion_item);
                 this._box.add(suggestion_item.actor, {
                     expand: false,
@@ -300,7 +326,35 @@ const GoogleEntrySuggestions = new Lang.Class({
             }
         }
 
-        this.select_suggestion(this._suggestion_items[select_index]);
+        if(suggestions.length < this._suggestion_items.length) {
+            let new_suggestion_items = [];
+
+            for(let i = 0; i < this._suggestion_items.length; i++) {
+                let suggestion_item = this._suggestion_items[i];
+
+                if(
+                    suggestions[i] !== undefined &&
+                    suggestions[i].text === suggestion_item.suggestion.text
+                ) {
+                    new_suggestion_items.push(suggestion_item);
+                    continue
+                }
+
+                Tweener.removeTweens(suggestion_item.actor);
+                Tweener.addTween(suggestion_item.actor, {
+                    time: 0.5,
+                    opacity: 0,
+                    transition: 'easeOutExpo',
+                    onComplete: Lang.bind(this, function() {
+                        suggestion_item.destroy();
+                    })
+                });
+            }
+
+            this._suggestion_items = new_suggestion_items;
+        }
+
+        this.select_suggestion(this._suggestion_items[0]);
     },
 
     _on_text_changed: function(clutter_text) {
@@ -354,7 +408,6 @@ const GoogleEntrySuggestions = new Lang.Class({
             this.hide();
             return;
         }
-        if(result.length < 1) return;
 
         this.show();
         this._cache.add(query, result);
@@ -393,8 +446,28 @@ const GoogleEntrySuggestions = new Lang.Class({
     },
 
     select_suggestion: function(suggestion_item) {
+        this._remove_timeouts();
         this.unselect_all();
         suggestion_item.actor.add_style_pseudo_class('selected');
+
+        let index = this._suggestion_items.indexOf(suggestion_item);
+        if(suggestion_item.has_calc_result || index === 0) return;
+
+        TIMEOUT_IDS.SUGGESTIONS = Mainloop.timeout_add(300,
+            Lang.bind(this, function() {
+                TIMEOUT_IDS.SUGGESTIONS = 0;
+                this._suggestions.get_suggestions(
+                    suggestion_item.suggestion.text,
+                    [GoogleSuggestions.SUGGESTION_TYPE.CALCULATOR],
+                    Lang.bind(this, function(query, result, error_message) {
+                        if(result === null || result.length < 1) return;
+                        suggestion_item.set_calc_result(result[0].text);
+                    })
+                );
+
+                return GLib.SOURCE_REMOVE;
+            })
+        );
     },
 
     select_next: function() {
