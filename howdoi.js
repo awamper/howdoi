@@ -238,6 +238,7 @@ const HowDoI = new Lang.Class({
 
         if(!animation) {
             this.actor.show();
+            this._search_entry.actor.show();
             this._show_done();
             return;
         }
