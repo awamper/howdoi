@@ -23,3 +23,5 @@ const GOOGLE_SUGGESTIONS_URL = 'google-suggestions-url';
 const MAX_GOOGLE_SUGGESTIONS = 'max-google-suggestions';
 const SUGGESTIONS_TIMEOUT = 'suggestions-timeout';
 const SUGGESTIONS_CACHE_LIMIT = 'suggestions-cache-limit'
+const ENABLE_SUGGESTIONS = 'enable-suggestions';
+const ENABLE_CALCULATOR = 'enable-calculator';

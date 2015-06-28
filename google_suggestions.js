@@ -71,7 +71,7 @@ const GoogleSuggestions = new Lang.Class({
         return suggestions;
     },
 
-    get_suggestions: function(query, types, callback) {
+    get_suggestions: function(query, types, limit, callback) {
         if(Utils.is_blank(query)) {
             callback(query, null, 'Query is empty.');
             return;
@@ -105,13 +105,7 @@ const GoogleSuggestions = new Lang.Class({
                         );
                     }
 
-                    let max_suggestions = Utils.SETTINGS.get_int(
-                        PrefsKeys.MAX_GOOGLE_SUGGESTIONS
-                    );
-                    if(max_suggestions > 0) {
-                        suggestions = suggestions.splice(0, max_suggestions);
-                    }
-
+                    if(limit > 0) suggestions = suggestions.splice(0, limit);
                     callback(query, suggestions);
                 }
                 catch(e) {

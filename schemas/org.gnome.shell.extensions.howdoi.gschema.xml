@@ -35,5 +35,13 @@
         <default>500</default>
     </key>
 
+    <key type="b" name="enable-suggestions">
+        <default>true</default>
+    </key>
+
+    <key type="b" name="enable-calculator">
+        <default>true</default>
+    </key>
+
   </schema>
 </schemalist>

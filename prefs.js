@@ -387,7 +387,14 @@ const HowDoIPrefsWidget = new GObject.Class({
             'Animations:',
             PrefsKeys.ENABLE_ANIMATIONS
         );
-
+        page.add_boolean(
+            'Suggestions:',
+            PrefsKeys.ENABLE_SUGGESTIONS
+        );
+        page.add_boolean(
+            'Google Calculator:',
+            PrefsKeys.ENABLE_CALCULATOR
+        );
         page.add_separator();
 
         let range_properties = {

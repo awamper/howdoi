@@ -35,6 +35,11 @@ const TIMEOUT_IDS = {
     SUGGESTIONS: 0
 };
 
+const CONNECTION_IDS = {
+    ENABLE_CALCULATOR: 0,
+    ENABLE_SUGGESTIONS: 0
+};
+
 const HIGHLIGHT_MARKUP = {
     START: '<span foreground="white" font_weight="heavy" underline="single">',
     STOP: '</span>'
@@ -170,6 +175,19 @@ const GoogleEntrySuggestions = new Lang.Class({
             'text-changed',
             Lang.bind(this, this._on_text_changed)
         );
+
+        CONNECTION_IDS.ENABLE_CALCULATOR = Utils.SETTINGS.connect(
+            'changed::' + PrefsKeys.ENABLE_CALCULATOR,
+            Lang.bind(this, function() {
+                this._cache.clear();
+            })
+        );
+        CONNECTION_IDS.ENABLE_SUGGESTIONS = Utils.SETTINGS.connect(
+            'changed::' + PrefsKeys.ENABLE_SUGGESTIONS,
+            Lang.bind(this, function() {
+                this._cache.clear();
+            })
+        );
     },
 
     _on_entry_key_press: function(sender, event) {
@@ -243,12 +261,14 @@ const GoogleEntrySuggestions = new Lang.Class({
             calc_result: ''
         };
 
-        if(suggestions.length > 0 && suggestions[0].text !== first_suggestion.text) {
-            for each(let suggestion in suggestions) {
-                if(suggestion.type === GoogleSuggestions.SUGGESTION_TYPE.CALCULATOR) {
-                    first_suggestion.calc_result = suggestion.text;
-                    suggestions.splice(suggestions.indexOf(suggestion), 1);
-                    break;
+        if(Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_CALCULATOR)) {
+            if(suggestions.length > 0 && suggestions[0].text !== first_suggestion.text) {
+                for each(let suggestion in suggestions) {
+                    if(suggestion.type === GoogleSuggestions.SUGGESTION_TYPE.CALCULATOR) {
+                        first_suggestion.calc_result = suggestion.text;
+                        suggestions.splice(suggestions.indexOf(suggestion), 1);
+                        break;
+                    }
                 }
             }
         }
@@ -360,6 +380,11 @@ const GoogleEntrySuggestions = new Lang.Class({
     _on_text_changed: function(clutter_text) {
         this._remove_timeouts();
 
+        if(
+            !Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_CALCULATOR) &&
+            !Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_SUGGESTIONS)
+        ) return;
+
         if(this._ignore_text_change) {
             this._ignore_text_change = false;
             return;
@@ -384,13 +409,19 @@ const GoogleEntrySuggestions = new Lang.Class({
             Utils.SETTINGS.get_int(PrefsKeys.SUGGESTIONS_TIMEOUT),
             Lang.bind(this, function() {
                 TIMEOUT_IDS.SUGGESTIONS = 0;
-                let types = [
-                    GoogleSuggestions.SUGGESTION_TYPE.QUERY,
-                    GoogleSuggestions.SUGGESTION_TYPE.CALCULATOR
-                ];
+                let types = [];
+
+                if(Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_SUGGESTIONS)) {
+                    types.push(GoogleSuggestions.SUGGESTION_TYPE.QUERY);
+                }
+                if(Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_CALCULATOR)) {
+                    types.push(GoogleSuggestions.SUGGESTION_TYPE.CALCULATOR);
+                }
+
                 this._suggestions.get_suggestions(
                     this._entry.text,
                     types,
+                    Utils.SETTINGS.get_int(PrefsKeys.MAX_GOOGLE_SUGGESTIONS),
                     Lang.bind(this, this._on_suggestions)
                 );
 
@@ -452,6 +483,7 @@ const GoogleEntrySuggestions = new Lang.Class({
 
         let index = this._suggestion_items.indexOf(suggestion_item);
         if(suggestion_item.has_calc_result || index === 0) return;
+        if(!Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_CALCULATOR)) return;
 
         TIMEOUT_IDS.SUGGESTIONS = Mainloop.timeout_add(300,
             Lang.bind(this, function() {
@@ -459,6 +491,7 @@ const GoogleEntrySuggestions = new Lang.Class({
                 this._suggestions.get_suggestions(
                     suggestion_item.suggestion.text,
                     [GoogleSuggestions.SUGGESTION_TYPE.CALCULATOR],
+                    1,
                     Lang.bind(this, function(query, result, error_message) {
                         if(result === null || result.length < 1) return;
                         suggestion_item.set_calc_result(result[0].text);
@@ -608,6 +641,12 @@ const GoogleEntrySuggestions = new Lang.Class({
         this._suggestions.destroy();
         this.clear();
         this._entry = null;
+
+        Utils.SETTINGS.disconnect(CONNECTION_IDS.ENABLE_CALCULATOR);
+        Utils.SETTINGS.disconnect(CONNECTION_IDS.ENABLE_SUGGESTIONS);
+        CONNECTION_IDS.ENABLE_CALCULATOR = 0;
+        CONNECTION_IDS.ENABLE_SUGGESTIONS = 0;
+
         this.parent();
     }
 });
@@ -643,7 +682,7 @@ const GoogleSuggestionsCache = new Lang.Class({
     },
 
     clear: function() {
-        this._suggestions = [];
+        this._items = [];
     },
 
     destroy: function() {
