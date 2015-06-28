@@ -103,5 +103,13 @@ const SearchEntry = new Lang.Class({
 
     get text() {
         return !this.is_empty() ? this.actor.get_text() : '';
+    },
+
+    get clutter_text() {
+        return this.actor.clutter_text;
+    },
+
+    get suggestions() {
+        return this._google_entry_suggestions;
     }
 });
