@@ -261,9 +261,7 @@ const PopupDialog = new Lang.Class({
 
     set shown(shown) {
         this._shown = shown;
-
-        if(this._shown) this.emit('shown');
-        else this.emit('hidden');
+        this.emit('notify::shown', shown);
     }
 });
 Signals.addSignalMethods(PopupDialog.prototype);
