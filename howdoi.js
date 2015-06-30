@@ -66,8 +66,8 @@ const HowDoI = new Lang.Class({
         this._answers_view = new AnswersView.AnswersView();
         this.actor.add(this._answers_view.actor, {
             expand: true,
-            x_fill: false,
-            y_fill: false,
+            x_fill: true,
+            y_fill: true,
             x_align: St.Align.MIDDLE,
             y_align: St.Align.MIDDLE
         });
@@ -123,13 +123,6 @@ const HowDoI = new Lang.Class({
 
         this.actor.set_width(width);
         this.actor.set_height(height);
-
-        this._answers_view.actor.set_width(
-            Math.round(width * 0.8)
-        );
-        this._answers_view.actor.set_height(
-            Math.round((height - this._search_entry.actor.height) * 0.8)
-        );
     },
 
     _reposition: function() {
