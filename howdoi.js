@@ -55,6 +55,12 @@ const HowDoI = new Lang.Class({
 
         this._search_entry = new SearchEntry.SearchEntry();
         this._search_entry.clutter_text.connect(
+            'text-changed',
+            Lang.bind(this, function() {
+                this._answers_view.clear(true);
+            })
+        );
+        this._search_entry.clutter_text.connect(
             'key-press-event',
             Lang.bind(this, this._on_entry_key_press_event)
         );
