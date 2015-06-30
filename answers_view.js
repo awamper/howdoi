@@ -131,6 +131,7 @@ const AnswersView = new Lang.Class({
         this._shown = false;
         this._answer_views = [];
         this._current_page = 0;
+        this._animation_running = false;
 
         let prev_icon = new St.Icon({
             icon_name: 'go-previous-symbolic'
@@ -248,6 +249,7 @@ const AnswersView = new Lang.Class({
     },
 
     _clear_animation_done: function() {
+        this._animation_running = false;
         this._scroll_view.opacity = 255;
         for each(let answer_view in this._answer_views) answer_view.destroy();
         this._answer_views = [];
@@ -279,6 +281,13 @@ const AnswersView = new Lang.Class({
     },
 
     set_answers: function(answer_texts) {
+        if(this._animation_running) {
+            Tweener.removeTweens(this._scroll_view);
+            this._scroll_view.opacity = 255;
+            this._animation_running = false;
+            this._hide_icon();
+        }
+
         if(typeof answer_texts === 'string') {
             if(!Utils.is_blank(answer_texts)) answer_texts = [answer_texts];
             else answer_texts = [];
@@ -320,6 +329,7 @@ const AnswersView = new Lang.Class({
         );
 
         if(animate_out) {
+            this._animation_running = true;
             this._show_icon();
             this._page_indicators.animate_indicators(
                 PageIndicators.ANIMATION_DIRECTION.OUT
