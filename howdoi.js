@@ -309,6 +309,22 @@ const HowDoI = new Lang.Class({
             time: 0.4
         });
 
+        Tweener.removeTweens(this._answers_view.actor);
+        Tweener.addTween(this._answers_view.actor, {
+            time: 0.1,
+            scale_x: 1.05,
+            scale_y: 1.05,
+            transition: 'easeOutQuad',
+            onComplete: Lang.bind(this, function() {
+                Tweener.addTween(this._answers_view.actor, {
+                    time: 0.1,
+                    scale_x: 1,
+                    scale_y: 1,
+                    transition: 'easeOutQuad'
+                });
+            })
+        });
+
         Tweener.removeTweens(this.actor);
         Tweener.addTween(this.actor, {
             delay: 0.2,
