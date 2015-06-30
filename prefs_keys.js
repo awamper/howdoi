@@ -25,3 +25,4 @@ const SUGGESTIONS_TIMEOUT = 'suggestions-timeout';
 const SUGGESTIONS_CACHE_LIMIT = 'suggestions-cache-limit'
 const ENABLE_SUGGESTIONS = 'enable-suggestions';
 const ENABLE_CALCULATOR = 'enable-calculator';
+const HIDE_PAGE_INDICATORS = 'hide-page-indicators';

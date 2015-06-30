@@ -12,7 +12,7 @@
     </key>
 
     <key type="i" name="dialog-width-percents">
-        <default>85</default>
+        <default>75</default>
     </key>
 
     <key type="i" name="dialog-height-percents">
@@ -41,6 +41,10 @@
 
     <key type="b" name="enable-calculator">
         <default>true</default>
+    </key>
+
+    <key type="b" name="hide-page-indicators">
+        <default>false</default>
     </key>
 
   </schema>

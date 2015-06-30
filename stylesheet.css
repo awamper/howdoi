@@ -85,10 +85,90 @@
     padding-bottom: 2px;
 }
 
-.howdoi-answers-view {
-    background-color: rgba(255, 255, 255, 0.3);
+.howdoi-answers-view-scroll {
+    padding-right: 50px;
+    padding-left: 50px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.howdoi-answers-view-box {
+    spacing: 50px;
+}
+
+.howdoi-answers-view-icon {
+    padding-right: 50px;
+    padding-left: 50px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    color: rgba(255, 255, 255, 0.1);
 }
 
 .howdoi-answer-view {
-    background-color: rgba(255, 0, 0, 0.5);
+    background-color: rgba(49, 49, 49, 0.8);
+    border: 1px solid rgba(154, 154, 142, 0.5);
+}
+
+.howdoi-answer-view StScrollView StScrollBar {
+    min-width: 12px;
+    min-height: 12px;
+}
+
+.howdoi-answer-view StScrollBar StBin#trough {
+    padding-left: 20px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 0px;
+}
+
+.howdoi-answer-view StScrollBar StBin#vhandle {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid #242424;
+    border-radius: 0px;
+    transition-duration: 300ms;
+}
+
+.howdoi-answer-view StScrollBar StBin#hhandle {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid #242424;
+    border-radius: 0px;
+    transition-duration: 300ms;
+}
+
+.howdoi-answer-view StScrollBar StBin#hhandle:hover,
+.howdoi-answer-view StScrollBar StBin#vhandle:hover {
+    background-color: rgba(255, 255, 255, 0.7);
+    transition-duration: 300ms;
+}
+
+.howdoi-answer-view StScrollBar StBin#hhandle:active,
+.howdoi-answer-view StScrollBar StBin#vhandle:active {
+    background-color: rgba(255, 255, 255, 0.7);
+    transition-duration: 300ms;
+}
+
+.howdoi-answer-view-entry {
+    box-shadow: none;
+    padding: 20px;
+    color: white;
+    font-size: 20px;
+    border: 1px solid transparent;
+}
+
+.howdoi-answer-view-entry:focus {
+    padding: 20px;
+    font-size: 20px;
+    box-shadow: none;
+    border: 1px solid transparent;
+}
+
+.howdoi-next-page-button, .howdoi-prev-page-button {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.howdoi-next-page-button:hover, .howdoi-prev-page-button:hover {
+    color: white;
+}
+
+.howdoi-next-page-button:disabled, .howdoi-prev-page-button:disabled {
+    color: rgba(255, 255, 255, 0.1);
 }

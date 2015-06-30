@@ -389,6 +389,8 @@ const HowDoIPrefsWidget = new GObject.Class({
             'Animations:',
             PrefsKeys.ENABLE_ANIMATIONS
         );
+        page.add_separator();
+
         page.add_boolean(
             'Suggestions:',
             PrefsKeys.ENABLE_SUGGESTIONS
@@ -396,6 +398,12 @@ const HowDoIPrefsWidget = new GObject.Class({
         page.add_boolean(
             'Google Calculator:',
             PrefsKeys.ENABLE_CALCULATOR
+        );
+        page.add_separator();
+
+        page.add_boolean(
+            'Hide page indicators:',
+            PrefsKeys.HIDE_PAGE_INDICATORS
         );
 
         return {
