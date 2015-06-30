@@ -54,6 +54,12 @@ const HowDoI = new Lang.Class({
         );
 
         this._search_entry = new SearchEntry.SearchEntry();
+        this._search_entry.connect(
+            'activate',
+            Lang.bind(this, function(search_entry) {
+                this._search(search_entry.text);
+            })
+        );
         this._search_entry.clutter_text.connect(
             'text-changed',
             Lang.bind(this, function() {
@@ -138,6 +144,11 @@ const HowDoI = new Lang.Class({
 
         return Clutter.EVENT_PROPOGATE;
     },
+
+    _search: function(query) {
+        log('Search ' + query);
+    },
+
     _resize: function() {
         let width_percents = Utils.SETTINGS.get_int(PrefsKeys.DIALOG_WIDTH_PERCENTS);
         let width = Math.round(Main.uiGroup.width / 100 * width_percents);
