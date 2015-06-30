@@ -192,6 +192,13 @@ const GoogleEntrySuggestions = new Lang.Class({
     },
 
     _on_entry_key_press: function(sender, event) {
+        if(
+            !Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_SUGGESTIONS) &&
+            !Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_CALCULATOR)
+        ) {
+            return Clutter.EVENT_PROPOGATE;
+        }
+
         let symbol = event.get_key_symbol();
         let is_enter = (
             symbol === Clutter.KEY_Return ||
