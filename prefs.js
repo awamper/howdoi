@@ -386,12 +386,6 @@ const HowDoIPrefsWidget = new GObject.Class({
         let page = new PrefsGrid(Utils.SETTINGS);
 
         page.add_boolean(
-            'Animations:',
-            PrefsKeys.ENABLE_ANIMATIONS
-        );
-        page.add_separator();
-
-        page.add_boolean(
             'Suggestions:',
             PrefsKeys.ENABLE_SUGGESTIONS
         );
