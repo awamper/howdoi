@@ -121,7 +121,12 @@ const HowDoI = new Lang.Class({
         let ch = Utils.get_unichar(symbol);
 
         if(symbol === Clutter.Escape) {
-            this.hide();
+            if(this._search_entry.suggestions.shown) {
+                this._search_entry.suggestions.hide();
+            }
+            else {
+                this.hide();
+            }
         }
         else if(ch) {
             this._search_entry.grab_key_focus();
