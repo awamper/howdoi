@@ -172,3 +172,21 @@
 .howdoi-next-page-button:disabled, .howdoi-prev-page-button:disabled {
     color: rgba(255, 255, 255, 0.1);
 }
+
+.howdoi-copy-button {
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 1px solid black;
+    padding: 5px;
+    color: #C4C4C4;
+    max-width: 200px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.howdoi-copy-button:hover {
+    color: #3465a4;
+}
+
+.howdoi-copy-button:active {
+    color: #0D4CA3;
+}
