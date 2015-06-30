@@ -54,6 +54,10 @@ const HowDoI = new Lang.Class({
         );
 
         this._search_entry = new SearchEntry.SearchEntry();
+        this._search_entry.clutter_text.connect(
+            'key-press-event',
+            Lang.bind(this, this._on_entry_key_press_event)
+        );
         this._search_entry.actor.hide();
         this.actor.add(this._search_entry.actor, {
             expand: false,
@@ -115,6 +119,19 @@ const HowDoI = new Lang.Class({
         return Clutter.EVENT_STOP;
     },
 
+    _on_entry_key_press_event: function(sender, event) {
+        let symbol = event.get_key_symbol();
+        let control = event.has_control_modifier();
+
+        if(control && symbol === Clutter.Right) {
+            this._answers_view.next_page();
+        }
+        else if(control && symbol === Clutter.Left) {
+            this._answers_view.prev_page();
+        }
+
+        return Clutter.EVENT_PROPOGATE;
+    },
     _resize: function() {
         let width_percents = Utils.SETTINGS.get_int(PrefsKeys.DIALOG_WIDTH_PERCENTS);
         let width = Math.round(Main.uiGroup.width / 100 * width_percents);
