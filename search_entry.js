@@ -47,6 +47,10 @@ const SearchEntry = new Lang.Class({
             'activate',
             Lang.bind(this, this._activate)
         );
+        this.actor.clutter_text.connect(
+            'key-press-event',
+            Lang.bind(this, this._on_key_press)
+        );
 
         let primary_icon = new St.Icon({
             style_class: 'howdoi-search-entry-icon',
@@ -74,6 +78,28 @@ const SearchEntry = new Lang.Class({
         else this._secondary_icon.show();
 
         return Clutter.EVENT_STOP;
+    },
+
+    _on_key_press: function(sender, event) {
+        let symbol = event.get_key_symbol();
+        let shift = event.has_shift_modifier();
+
+        if(symbol === Clutter.Right && !shift) {
+            let selection = this.clutter_text.get_selection();
+
+            if(
+                !Utils.is_blank(selection) &&
+                selection.length === this.text.length
+            ) {
+                this.clutter_text.set_cursor_position(
+                    this.text.length
+                );
+
+                return Clutter.EVENT_STOP;
+            }
+        }
+
+        return Clutter.EVENT_PROPAGATE;
     },
 
     _activate: function() {
