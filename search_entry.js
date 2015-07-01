@@ -82,9 +82,10 @@ const SearchEntry = new Lang.Class({
 
     _on_key_press: function(sender, event) {
         let symbol = event.get_key_symbol();
+        let control = event.has_control_modifier();
         let shift = event.has_shift_modifier();
 
-        if(symbol === Clutter.Right && !shift) {
+        if(symbol === Clutter.Right && !shift && !control) {
             let selection = this.clutter_text.get_selection();
 
             if(
