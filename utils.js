@@ -25,12 +25,21 @@ const SPINNER_ICON_SIZE = 24;
 
 const SETTINGS = getSettings();
 
+const USER_AGENTS = [
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0',
+    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0',
+    'Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5',
+    'Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5'
+];
+const DEFAULT_USER_AGENT = 'GNOME Shell HowDoI Extension';
+
 const HTTP_CACHE = new Soup.Cache({
     cache_dir: null,
     cache_type: Soup.CacheType.SINGLE_USER
 });
 const HTTP_SESSION = new Soup.SessionAsync({
-    user_agent: 'GNOME Shell HowDoI Extension',
+    user_agent: DEFAULT_USER_AGENT,
     timeout: 2
 });
 Soup.Session.prototype.add_feature.call(
