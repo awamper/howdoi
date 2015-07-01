@@ -25,13 +25,22 @@ const SPINNER_ICON_SIZE = 24;
 
 const SETTINGS = getSettings();
 
-const HTTP_SESSION = new Soup.SessionAsync();
+const HTTP_CACHE = new Soup.Cache({
+    cache_dir: null,
+    cache_type: Soup.CacheType.SINGLE_USER
+});
+const HTTP_SESSION = new Soup.SessionAsync({
+    user_agent: 'GNOME Shell HowDoI Extension',
+    timeout: 2
+});
 Soup.Session.prototype.add_feature.call(
     HTTP_SESSION,
     new Soup.ProxyResolverDefault()
 );
-HTTP_SESSION.user_agent = 'GNOME Shell HowDoI Extension';
-HTTP_SESSION.timeout = 1;
+Soup.Session.prototype.add_feature.call(
+    HTTP_SESSION,
+    HTTP_CACHE
+);
 
 function launch_extension_prefs(uuid) {
     const Shell = imports.gi.Shell;

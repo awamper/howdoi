@@ -446,6 +446,7 @@ const HowDoI = new Lang.Class({
     },
 
     destroy: function() {
+        Utils.HTTP_CACHE.dump();
         this._disconnect_captured_event();
         this._progress_bar.destroy();
         this._background_actor.destroy();
