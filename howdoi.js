@@ -123,7 +123,9 @@ const HowDoI = new Lang.Class({
     },
 
     _on_key_press_event: function(sender, event) {
+        let code = event.get_key_code();
         let symbol = event.get_key_symbol();
+        let control = event.has_control_modifier();
         let ch = Utils.get_unichar(symbol);
 
         if(symbol === Clutter.Escape) {
@@ -133,6 +135,16 @@ const HowDoI = new Lang.Class({
             else {
                 this.hide();
             }
+        }
+        else if(code === 55 && control) {
+            St.Clipboard.get_default().get_text(
+                St.ClipboardType.CLIPBOARD,
+                Lang.bind(this, function(clipboard, text) {
+                    if(Utils.is_blank(text)) return;
+                    this._search_entry.grab_key_focus(true);
+                    this._search_entry.set_text(text);
+                })
+            );
         }
         else if(ch) {
             this._search_entry.grab_key_focus(false);
