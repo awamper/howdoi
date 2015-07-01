@@ -197,7 +197,7 @@ const GoogleEntrySuggestions = new Lang.Class({
             !Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_SUGGESTIONS) &&
             !Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_CALCULATOR)
         ) {
-            return Clutter.EVENT_PROPOGATE;
+            return Clutter.EVENT_PROPAGATE;
         }
 
         let symbol = event.get_key_symbol();
@@ -230,7 +230,7 @@ const GoogleEntrySuggestions = new Lang.Class({
 
         }
 
-        return Clutter.EVENT_PROPOGATE;
+        return Clutter.EVENT_PROPAGATE;
     },
 
     _on_suggestion_activate: function(suggestion_item) {
