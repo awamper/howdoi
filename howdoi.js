@@ -80,6 +80,12 @@ const HowDoI = new Lang.Class({
         });
 
         this._answers_view = new AnswersView.AnswersView();
+        this._answers_view.page_indicators.connect(
+            'notify::current-page',
+            Lang.bind(this, function() {
+                this._search_entry.grab_key_focus(true);
+            })
+        );
         this.actor.add(this._answers_view.actor, {
             expand: true,
             x_fill: true,
@@ -129,7 +135,7 @@ const HowDoI = new Lang.Class({
             }
         }
         else if(ch) {
-            this._search_entry.grab_key_focus();
+            this._search_entry.grab_key_focus(false);
             this._search_entry.set_text(ch);
         }
 
@@ -142,9 +148,11 @@ const HowDoI = new Lang.Class({
 
         if(control && symbol === Clutter.Right) {
             this._answers_view.next_page();
+            return Clutter.EVENT_STOP;
         }
         else if(control && symbol === Clutter.Left) {
             this._answers_view.prev_page();
+            return Clutter.EVENT_STOP;
         }
 
         return Clutter.EVENT_PROPAGATE;
@@ -245,7 +253,7 @@ const HowDoI = new Lang.Class({
         this._connect_captured_event();
 
         if(!this._search_entry.is_empty()) {
-            this._search_entry.grab_key_focus();
+            this._search_entry.grab_key_focus(true);
         }
     },
 
