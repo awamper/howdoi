@@ -369,9 +369,12 @@ const AnswersView = new Lang.Class({
         if(animate_out) {
             this._animation_running = true;
             this._show_icon();
+            this._prev_btn.hide();
+            this._next_btn.hide();
             this._page_indicators.animate_indicators(
                 PageIndicators.ANIMATION_DIRECTION.OUT
             );
+
             Tweener.removeTweens(this._scroll_view);
             Tweener.addTween(this._scroll_view, {
                 opacity: 0,
