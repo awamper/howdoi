@@ -100,8 +100,8 @@ const SearchEntry = new Lang.Class({
         this.actor.set_text(text);
     },
 
-    grab_key_focus: function() {
-        if(!this.is_empty()) {
+    grab_key_focus: function(select_text) {
+        if(!this.is_empty() && select_text === true) {
             this.actor.clutter_text.set_selection(0, this.text.length);
         }
 
