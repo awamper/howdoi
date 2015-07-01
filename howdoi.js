@@ -147,7 +147,7 @@ const HowDoI = new Lang.Class({
             this._answers_view.prev_page();
         }
 
-        return Clutter.EVENT_PROPOGATE;
+        return Clutter.EVENT_PROPAGATE;
     },
 
     _search: function(query) {
@@ -190,7 +190,7 @@ const HowDoI = new Lang.Class({
             if(pointer_outside) this.hide();
         }
 
-        return Clutter.EVENT_PROPOGATE;
+        return Clutter.EVENT_PROPAGATE;
     },
 
     _show_background: function() {
