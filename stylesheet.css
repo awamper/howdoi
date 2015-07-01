@@ -189,3 +189,12 @@
 .howdoi-copy-button:active {
     color: #0D4CA3;
 }
+
+.howdoi-progress-bar-box {
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.howdoi-progress-bar {
+    background-color: #215d9c;
+}

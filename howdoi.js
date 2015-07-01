@@ -30,6 +30,7 @@ const Utils = Me.imports.utils;
 const PrefsKeys = Me.imports.prefs_keys;
 const SearchEntry = Me.imports.search_entry;
 const AnswersView = Me.imports.answers_view;
+const ProgressBar = Me.imports.progress_bar;
 
 const CONNECTION_IDS = {
     CAPTURED_EVENT: 0
@@ -42,10 +43,10 @@ const HowDoI = new Lang.Class({
     Name: 'HowDoI',
 
     _init: function() {
-        this.actor = new St.BoxLayout({
+        this.actor = new St.Table({
             style_class: 'howdoi-main-box',
             visible: false,
-            vertical: true
+            homogeneous: false
         });
         this.actor.set_pivot_point(0.5, 0.5);
         this.actor.connect(
@@ -72,10 +73,29 @@ const HowDoI = new Lang.Class({
         );
         this._search_entry.actor.hide();
         this.actor.add(this._search_entry.actor, {
-            expand: false,
+            row: 0,
+            col: 0,
+            x_expand: false,
+            y_expand: false,
             x_fill: true,
-            x_align: St.Align.MIDDLE,
             y_fill: false,
+            x_align: St.Align.MIDDLE,
+            y_align: St.Align.START
+        });
+
+        this._progress_bar = new ProgressBar.ProgressBar({
+            box_style_class: 'howdoi-progress-bar-box',
+            progress_style_class: 'howdoi-progress-bar',
+        });
+        this._progress_bar.hide();
+        this.actor.add(this._progress_bar.actor, {
+            row: 0,
+            col: 0,
+            x_expand: true,
+            y_expand: false,
+            x_fill: false,
+            y_fill: false,
+            x_align: St.Align.MIDDLE,
             y_align: St.Align.START
         });
 
@@ -87,7 +107,10 @@ const HowDoI = new Lang.Class({
             })
         );
         this.actor.add(this._answers_view.actor, {
-            expand: true,
+            row: 1,
+            col: 0,
+            x_expand: true,
+            y_expand: true,
             x_fill: true,
             y_fill: true,
             x_align: St.Align.MIDDLE,
@@ -180,8 +203,19 @@ const HowDoI = new Lang.Class({
         let height_pecents = Utils.SETTINGS.get_int(PrefsKeys.DIALOG_HEIGHT_PERCENTS);
         let height = Math.round(Main.uiGroup.height / 100 * height_pecents);
 
+        let padding = (
+            this.actor.get_theme_node().get_padding(St.Side.LEFT) +
+            this.actor.get_theme_node().get_padding(St.Side.RIGHT)
+        );
+        let border_width = (
+            this._search_entry.actor.get_theme_node().get_border_width(St.Side.LEFT) +
+            this._search_entry.actor.get_theme_node().get_border_width(St.Side.RIGHT)
+        );
+        let shadow_offset = 4;
+
         this.actor.set_width(width);
         this.actor.set_height(height);
+        this._progress_bar.actor.set_width(width - padding - shadow_offset);
     },
 
     _reposition: function() {
@@ -413,6 +447,7 @@ const HowDoI = new Lang.Class({
 
     destroy: function() {
         this._disconnect_captured_event();
+        this._progress_bar.destroy();
         this._background_actor.destroy();
         this._answers_view.destroy();
         this._search_entry.destroy();
