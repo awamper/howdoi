@@ -451,6 +451,10 @@ const AnswersView = new Lang.Class({
 
     get n_results() {
         return this._answer_views.length;
+    },
+
+    get page_indicators() {
+        return this._page_indicators;
     }
 });
 Signals.addSignalMethods(AnswersView.prototype);
