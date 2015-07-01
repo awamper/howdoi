@@ -176,6 +176,7 @@ const GoogleEntrySuggestions = new Lang.Class({
         this._suggestion_items = [];
         this._showing = false;
         this._ignore_text_change = false;
+        this._abort_trigger = false;
 
         CONNECTION_IDS.ENABLE_CALCULATOR = Utils.SETTINGS.connect(
             'changed::' + PrefsKeys.ENABLE_CALCULATOR,
@@ -216,10 +217,17 @@ const GoogleEntrySuggestions = new Lang.Class({
         else if(Utils.symbol_is_tab(symbol)) {
             this.select_next();
         }
-        else if(is_enter && (this.shown || this._showing)) {
-            let selected = this.get_selected();
-            if(selected) selected.activate();
-            return Clutter.EVENT_STOP;
+        else if(is_enter) {
+            if(this.shown || this._showing) {
+                let selected = this.get_selected();
+                if(selected) selected.activate();
+                return Clutter.EVENT_STOP;
+            }
+            else {
+                this._abort_trigger = true;
+                return Clutter.EVENT_PROPAGATE;
+            }
+
         }
 
         return Clutter.EVENT_PROPOGATE;
@@ -586,6 +594,11 @@ const GoogleEntrySuggestions = new Lang.Class({
 
     show: function(animation) {
         if(this.shown || this._showing) return;
+
+        if(this._abort_trigger) {
+            this._abort_trigger = false;
+            return;
+        }
 
         this._showing = true;
         this._reposition();
