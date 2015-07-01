@@ -32,6 +32,7 @@ const PageIndicators = Me.imports.page_indicators;
 const PAGE_SWITCH_TIME = 0.3;
 const RESULTS_ANIMATION_TIME = 0.3;
 
+const ICON_MAX_SIZE = 45;
 const ICON_ANIMATION_TIME = 0.2;
 const ICON_MIN_OPACITY = 30;
 const ICON_MAX_OPACITY = 255;
@@ -65,7 +66,9 @@ const AnswersView = new Lang.Class({
             Gtk.PolicyType.EXTERNAL
         );
 
-        this._table = new St.Table();
+        this._table = new St.Table({
+            homogeneous: false
+        });
         this._table.add(this._scroll_view, {
             row: 0,
             col: 0
@@ -215,8 +218,13 @@ const AnswersView = new Lang.Class({
         let height = allocation_box.y2 - allocation_box.y1;
 
         this._background_icon.icon_size = Math.round(height * 0.7);
-        this._prev_btn.child.icon_size = Math.round(height * 0.1);
-        this._next_btn.child.icon_size = Math.round(height * 0.1);
+
+        let button_size = Math.min(
+            Math.round(height * 0.1),
+            ICON_MAX_SIZE
+        );
+        this._prev_btn.child.icon_size = button_size;
+        this._next_btn.child.icon_size = button_size;
     },
 
     _resize_answer_views: function() {
@@ -230,13 +238,42 @@ const AnswersView = new Lang.Class({
         let actor_width = allocation.x2 - allocation.x1;
         let actor_height = allocation.y2 - allocation.y1;
 
-        answer_view.set_width(Math.round(actor_width * 0.9));
-        answer_view.set_height(Math.round(actor_height * 0.8));
+        let scroll_theme_node = this._scroll_view.get_theme_node();
+        let answer_theme_node = answer_view._scroll.get_theme_node();
+
+        let left_padding = scroll_theme_node.get_padding(St.Side.LEFT);
+        let right_padding = scroll_theme_node.get_padding(St.Side.RIGHT);
+        let top_padding = scroll_theme_node.get_padding(St.Side.TOP);
+        let bottom_padding = scroll_theme_node.get_padding(St.Side.BOTTOM);
+
+        let border_width = (
+            answer_theme_node.get_border_width(St.Side.LEFT) +
+            answer_theme_node.get_border_width(St.Side.RIGHT)
+        );
+        let border_height = (
+            answer_theme_node.get_border_width(St.Side.TOP) +
+            answer_theme_node.get_border_width(St.Side.BOTTOM)
+        );
+
+        let page_indicators_height = 48;
+
+        answer_view.set_width(
+            actor_width -
+            left_padding -
+            right_padding -
+            border_width
+        );
+        answer_view.set_height(
+            actor_height -
+            top_padding -
+            bottom_padding -
+            border_height -
+            page_indicators_height
+        );
     },
 
     _add_answer: function(answer_text) {
         let answer_view = new AnswerView.AnswerView(answer_text);
-        this._resize_answer_view(answer_view);
         this._box.add(answer_view.actor, {
             expand: true,
             x_fill: false,
@@ -244,6 +281,7 @@ const AnswersView = new Lang.Class({
             x_align: St.Align.MIDDLE,
             y_align: St.Align.MIDDLE
         });
+        this._resize_answer_view(answer_view);
         this._answer_views.push(answer_view);
         this.emit('notify::n-results');
     },
