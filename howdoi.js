@@ -30,6 +30,7 @@ const Utils = Me.imports.utils;
 const PrefsKeys = Me.imports.prefs_keys;
 const SearchEntry = Me.imports.search_entry;
 const AnswersView = Me.imports.answers_view;
+const AnswersProvider = Me.imports.answers_provider;
 const ProgressBar = Me.imports.progress_bar;
 
 const CONNECTION_IDS = {
@@ -53,6 +54,8 @@ const HowDoI = new Lang.Class({
             'key-press-event',
             Lang.bind(this, this._on_key_press_event)
         );
+
+        this._answers_provider = new AnswersProvider.AnswersProvider();
 
         this._search_entry = new SearchEntry.SearchEntry();
         this._search_entry.connect(
@@ -194,7 +197,24 @@ const HowDoI = new Lang.Class({
     },
 
     _search: function(query) {
-        log('Search ' + query);
+        this._progress_bar.pulse_mode = true;
+        this._progress_bar.start();
+        this._progress_bar.show();
+
+        let max_answers = Utils.SETTINGS.get_int(PrefsKeys.MAX_ANSWERS);
+        this._answers_provider.get_answers(query, max_answers,
+            Lang.bind(this, function(answers, error) {
+                this._progress_bar.stop();
+                this._progress_bar.hide();
+
+                if(answers === null) {
+                    log(error);
+                    return;
+                }
+
+                this._answers_view.set_answers(answers);
+            })
+        );
     },
 
     _resize: function() {
@@ -450,6 +470,7 @@ const HowDoI = new Lang.Class({
         this._disconnect_captured_event();
         this._progress_bar.destroy();
         this._background_actor.destroy();
+        this._answers_provider.destroy();
         this._answers_view.destroy();
         this._search_entry.destroy();
         this.actor.destroy();
