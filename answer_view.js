@@ -38,10 +38,12 @@ const TIMEOUT_IDS = {
 const AnswerView = new Lang.Class({
     Name: 'HowDoIAnswerView',
 
-    _init: function(answer_text) {
+    _init: function(answer) {
         this.actor = new St.BoxLayout({
             reactive: true
         });
+
+        this._answer = null;
 
         this._entry = new St.Entry({
             style_class: 'howdoi-answer-view-entry'
@@ -118,7 +120,7 @@ const AnswerView = new Lang.Class({
         );
         Main.uiGroup.add_child(this._copy_button);
 
-        this.set_answer(answer_text);
+        this.set_answer(answer);
     },
 
     _on_cursor_changed: function() {
@@ -207,8 +209,9 @@ const AnswerView = new Lang.Class({
         });
     },
 
-    set_answer: function(text) {
-        this._entry.set_text(text);
+    set_answer: function(answer) {
+        this._answer = answer;
+        this._entry.set_text(answer.body);
     },
 
     set_width: function(width) {
@@ -222,6 +225,11 @@ const AnswerView = new Lang.Class({
     destroy: function() {
         this._remove_timeout();
         this._copy_button.destroy();
+        this._answer = null;
         this.actor.destroy();
+    },
+
+    get answer() {
+        return this._answer;
     }
 });
