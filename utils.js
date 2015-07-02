@@ -38,7 +38,7 @@ const HTTP_CACHE = new Soup.Cache({
     cache_dir: null,
     cache_type: Soup.CacheType.SINGLE_USER
 });
-const HTTP_SESSION = new Soup.SessionAsync({
+const HTTP_SESSION = new Soup.Session({
     user_agent: DEFAULT_USER_AGENT,
     timeout: 2
 });
