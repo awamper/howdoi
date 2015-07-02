@@ -396,6 +396,12 @@ const HowDoIPrefsWidget = new GObject.Class({
         page.add_separator();
 
         page.add_boolean(
+            'Use Google search:',
+            PrefsKeys.USE_GOOGLE_SEARCH
+        );
+        page.add_separator();
+
+        page.add_boolean(
             'Hide page indicators:',
             PrefsKeys.HIDE_PAGE_INDICATORS
         );

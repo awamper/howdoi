@@ -47,5 +47,13 @@
         <default>false</default>
     </key>
 
+    <key type="b" name="use-google-search">
+        <default>true</default>
+    </key>
+
+    <key type="s" name="default-site">
+        <default>'stackoverflow.com'</default>
+    </key>
+
   </schema>
 </schemalist>

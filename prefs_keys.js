@@ -26,3 +26,5 @@ const SUGGESTIONS_CACHE_LIMIT = 'suggestions-cache-limit'
 const ENABLE_SUGGESTIONS = 'enable-suggestions';
 const ENABLE_CALCULATOR = 'enable-calculator';
 const HIDE_PAGE_INDICATORS = 'hide-page-indicators';
+const USE_GOOGLE_SEARCH = 'use-google-search';
+const DEFAULT_SITE = 'default-site';
