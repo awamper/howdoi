@@ -401,6 +401,18 @@ const HowDoIPrefsWidget = new GObject.Class({
         );
         page.add_separator();
 
+        let spin_properties = {
+            lower: 1,
+            upper: 10,
+            step_increment: 1
+        };
+        page.add_spin(
+            'Max answers:',
+            PrefsKeys.MAX_ANSWERS,
+            spin_properties,
+            'int'
+        );
+
         page.add_boolean(
             'Hide page indicators:',
             PrefsKeys.HIDE_PAGE_INDICATORS

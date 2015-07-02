@@ -55,5 +55,9 @@
         <default>'stackoverflow.com'</default>
     </key>
 
+    <key type="i" name="max-answers">
+        <default>5</default>
+    </key>
+
   </schema>
 </schemalist>
