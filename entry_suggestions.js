@@ -526,24 +526,27 @@ const EntrySuggestions = new Lang.Class({
         this.unselect_all();
         suggestion_item.actor.add_style_pseudo_class('selected');
 
-        let real_length = this._suggestion_items[0].suggestion.text.length;
-        this._ignore_text_change = true;
-        this._entry.set_text(suggestion_item.suggestion.text);
+        let suggestion_index = this._suggestion_items.indexOf(suggestion_item);
 
-        let should_select = Utils.starts_with(
-            suggestion_item.suggestion.text,
-            this._suggestion_items[0].suggestion.text
-        ) && this._suggestion_items.indexOf(suggestion_item) > 0;
+        if(suggestion_index > 0) {
+            let real_length = this._suggestion_items[0].suggestion.text.length;
+            this._ignore_text_change = true;
+            this._entry.set_text(suggestion_item.suggestion.text);
 
-        if(should_select) {
-            this._entry.clutter_text.set_selection(real_length, -1);
+            let should_select = Utils.starts_with(
+                suggestion_item.suggestion.text,
+                this._suggestion_items[0].suggestion.text
+            );
+
+            if(should_select) {
+                this._entry.clutter_text.set_selection(real_length, -1);
+            }
+            else {
+                this._entry.clutter_text.set_cursor_position(-1);
+            }
         }
-        else {
-            this._entry.clutter_text.set_cursor_position(-1);
-        }
 
-        let index = this._suggestion_items.indexOf(suggestion_item);
-        if(suggestion_item.has_calc_result || index === 0) return;
+        if(suggestion_item.has_calc_result || suggestion_index === 0) return;
         if(!Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_CALCULATOR)) return;
 
         TIMEOUT_IDS.SUGGESTIONS = Mainloop.timeout_add(300,
