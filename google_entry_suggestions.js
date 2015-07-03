@@ -208,14 +208,35 @@ const GoogleEntrySuggestions = new Lang.Class({
         );
 
         if(symbol === Clutter.Up) {
-            this.select_prev();
+            if(!this.select_prev()) {
+                this.select_suggestion(
+                    this._suggestion_items[this._suggestion_items.length - 1]
+                );
+            }
         }
         else if(symbol === Clutter.Down) {
-            if(this.shown) this.select_next();
-            else this.show();
+            if(this.shown) {
+                if(!this.select_next()) {
+                    this.select_suggestion(this._suggestion_items[0]);
+                }
+            }
+            else {
+                this.show();
+            }
         }
         else if(Utils.symbol_is_tab(symbol)) {
-            this.select_next();
+            if(event.has_control_modifier()) {
+                if(!this.select_prev()) {
+                    this.select_suggestion(
+                        this._suggestion_items[this._suggestion_items.length - 1]
+                    );
+                }
+            }
+            else {
+                if(!this.select_next()) {
+                    this.select_suggestion(this._suggestion_items[0]);
+                }
+            }
         }
         else if(is_enter) {
             if(this.shown || this._showing) {
