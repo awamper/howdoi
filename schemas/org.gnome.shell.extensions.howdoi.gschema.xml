@@ -23,7 +23,7 @@
         <default><![CDATA['https://suggestqueries.google.com/complete/search?client=chrome&q=%s']]></default>
     </key>
 
-    <key type="i" name="max-google-suggestions">
+    <key type="i" name="max-suggestions">
         <default>5</default>
     </key>
 

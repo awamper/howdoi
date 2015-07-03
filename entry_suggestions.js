@@ -45,8 +45,8 @@ const HIGHLIGHT_MARKUP = {
     STOP: '</span>'
 };
 
-const GoogleEntrySuggestionItem = new Lang.Class({
-    Name: 'GoogleEntrySuggestionItem',
+const EntrySuggestionItem = new Lang.Class({
+    Name: 'HowDoIEntrySuggestionItem',
 
     _init: function(suggestion, reactive) {
         this.suggestion = suggestion;
@@ -131,11 +131,11 @@ const GoogleEntrySuggestionItem = new Lang.Class({
         return !Utils.is_blank(this._calc_result.text);
     }
 });
-Signals.addSignalMethods(GoogleEntrySuggestionItem.prototype);
+Signals.addSignalMethods(EntrySuggestionItem.prototype);
 
-const DummySuggestionItem = new Lang.Class({
-    Name: 'GoogleEntrySuggestionDummyItem',
-    Extends: GoogleEntrySuggestionItem,
+const DummyEntrySuggestionItem = new Lang.Class({
+    Name: 'HowDoIEntrySuggestionDummyItem',
+    Extends: EntrySuggestionItem,
 
     _init: function() {
         this.parent({
@@ -146,8 +146,8 @@ const DummySuggestionItem = new Lang.Class({
     }
 });
 
-const GoogleEntrySuggestions = new Lang.Class({
-    Name: 'GoogleEntrySuggestions',
+const EntrySuggestions = new Lang.Class({
+    Name: 'HowDoIEntrySuggestions',
     Extends: PopupDialog.PopupDialog,
 
     _init: function(entry) {
@@ -171,7 +171,7 @@ const GoogleEntrySuggestions = new Lang.Class({
             Lang.bind(this, this._on_text_changed)
         );
 
-        this._cache = new GoogleSuggestionsCache();
+        this._cache = new EntrySuggestionsCache();
         this._suggestions = new GoogleSuggestions.GoogleSuggestions();
         this._suggestion_items = [];
         this._showing = false;
@@ -262,12 +262,12 @@ const GoogleEntrySuggestions = new Lang.Class({
     },
 
     _calculate_height: function() {
-        let dummy = new DummySuggestionItem();
+        let dummy = new DummyEntrySuggestionItem();
         dummy.actor.opacity = 0;
         Main.uiGroup.add_child(dummy.actor);
         let height = (
             dummy.actor.height *
-            (Utils.SETTINGS.get_int(PrefsKeys.MAX_GOOGLE_SUGGESTIONS) + 1)
+            (Utils.SETTINGS.get_int(PrefsKeys.MAX_SUGGESTIONS) + 1)
         );
         Main.uiGroup.remove_child(dummy.actor);
 
@@ -334,7 +334,7 @@ const GoogleEntrySuggestions = new Lang.Class({
                     GoogleSuggestions.SUGGESTION_TYPE.CALCULATOR
                 );
                 let new_suggestion_item =
-                    new GoogleEntrySuggestionItem(new_suggestion, reactive);
+                    new EntrySuggestionItem(new_suggestion, reactive);
                 new_suggestion_item.connect('activate',
                     Lang.bind(this, this._on_suggestion_activate)
                 );
@@ -374,7 +374,7 @@ const GoogleEntrySuggestions = new Lang.Class({
                     GoogleSuggestions.SUGGESTION_TYPE.CALCULATOR
                 );
                 let suggestion_item =
-                    new GoogleEntrySuggestionItem(suggestions[i], reactive);
+                    new EntrySuggestionItem(suggestions[i], reactive);
                 suggestion_item.connect('activate',
                     Lang.bind(this, this._on_suggestion_activate)
                 );
@@ -466,7 +466,7 @@ const GoogleEntrySuggestions = new Lang.Class({
                 this._suggestions.get_suggestions(
                     this._entry.text,
                     types,
-                    Utils.SETTINGS.get_int(PrefsKeys.MAX_GOOGLE_SUGGESTIONS),
+                    Utils.SETTINGS.get_int(PrefsKeys.MAX_SUGGESTIONS),
                     Lang.bind(this, this._on_suggestions)
                 );
 
@@ -478,7 +478,7 @@ const GoogleEntrySuggestions = new Lang.Class({
     _on_suggestions: function(query, result, error_message) {
         if(this._entry.text !== query) return;
         if(result === null) {
-            log('GoogleEntrySuggestions:_on_text_changed(): %s'.format(
+            log('EntrySuggestions:_on_text_changed(): %s'.format(
                 error_message)
             );
             this.hide();
@@ -704,10 +704,10 @@ const GoogleEntrySuggestions = new Lang.Class({
         this.parent();
     }
 });
-Signals.addSignalMethods(GoogleEntrySuggestions.prototype);
+Signals.addSignalMethods(EntrySuggestions.prototype);
 
-const GoogleSuggestionsCache = new Lang.Class({
-    Name: 'GoogleSuggestionsCache',
+const EntrySuggestionsCache = new Lang.Class({
+    Name: 'HowDoIEntrySuggestionsCache',
 
     _init: function() {
         this._items = [];
