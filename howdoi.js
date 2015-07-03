@@ -156,7 +156,7 @@ const HowDoI = new Lang.Class({
 
         if(symbol === Clutter.Escape) {
             if(this._search_entry.suggestions.shown) {
-                this._search_entry.suggestions.hide();
+                this._search_entry.suggestions.hide(false);
             }
             else {
                 this.hide();
