@@ -90,7 +90,7 @@ const SearchEntry = new Lang.Class({
 
             if(
                 !Utils.is_blank(selection) &&
-                selection.length === this.text.length
+                this.clutter_text.get_selection_bound() === -1
             ) {
                 this.clutter_text.set_cursor_position(
                     this.text.length
