@@ -505,6 +505,11 @@ const GoogleEntrySuggestions = new Lang.Class({
         this.unselect_all();
         suggestion_item.actor.add_style_pseudo_class('selected');
 
+        let real_length = this._suggestion_items[0].suggestion.text.length;
+        this._ignore_text_change = true;
+        this._entry.set_text(suggestion_item.suggestion.text);
+        this._entry.clutter_text.set_selection(real_length, -1);
+
         let index = this._suggestion_items.indexOf(suggestion_item);
         if(suggestion_item.has_calc_result || index === 0) return;
         if(!Utils.SETTINGS.get_boolean(PrefsKeys.ENABLE_CALCULATOR)) return;
