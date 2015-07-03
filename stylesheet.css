@@ -198,3 +198,8 @@
 .howdoi-progress-bar {
     background-color: #215d9c;
 }
+
+.howdoi-nothing-label {
+    font-size: 50px;
+    color: rgba(255, 255, 255, 0.5);
+}

@@ -32,10 +32,20 @@ const PageIndicators = Me.imports.page_indicators;
 const PAGE_SWITCH_TIME = 0.3;
 const RESULTS_ANIMATION_TIME = 0.3;
 
-const ICON_MAX_SIZE = 45;
+const BUTTON_ICON_MAX_SIZE = 45;
+
 const ICON_ANIMATION_TIME = 0.2;
 const ICON_MIN_OPACITY = 30;
 const ICON_MAX_OPACITY = 255;
+
+const ICON_NAMES = {
+    NOTHING_FOUND: 'face-sad-symbolic',
+    DEFAULT: 'face-cool-symbolic'
+};
+
+const LABEL_ANIMATION_TIME = 0.3;
+const LABEL_MAX_FONT_SIZE = 50;
+const LABEL_MIN_FONT_SIZE = 10;
 
 const AnswersView = new Lang.Class({
     Name: 'HowDoIAnswersView',
@@ -181,7 +191,7 @@ const AnswersView = new Lang.Class({
         });
 
         this._background_icon = new St.Icon({
-            icon_name: 'face-cool-symbolic',
+            icon_name: ICON_NAMES.DEFAULT,
             style_class: 'howdoi-answers-view-icon',
             opacity: ICON_MAX_OPACITY
         });
@@ -195,12 +205,31 @@ const AnswersView = new Lang.Class({
             x_align: St.Align.MIDDLE,
             y_align: St.Align.MIDDLE
         });
+
+        this._nothing_label = new St.Label({
+            text: 'Sorry, couldn\'t find any help with that topic',
+            style_class: 'howdoi-nothing-label',
+            visible: false
+        })
+        this._table.add(this._nothing_label, {
+            row: 0,
+            col: 0,
+            row_span: 2,
+            expand: true,
+            x_fill: false,
+            y_fill: false,
+            x_align: St.Align.MIDDLE,
+            y_align: St.Align.END
+        });
+
         this._resize_icons();
+        this._resize_label();
     },
 
     _on_allocation_changed: function() {
         this._resize_answer_views();
         this._resize_icons();
+        this._resize_label();
     },
 
     _on_scroll: function(actor, event) {
@@ -212,6 +241,16 @@ const AnswersView = new Lang.Class({
         return Clutter.EVENT_STOP;
     },
 
+    _resize_label: function() {
+        let allocation_box = this.actor.get_allocation_box();
+        let height = allocation_box.y2 - allocation_box.y1;
+        let size = Math.round(height * 0.1);
+        if(size > LABEL_MAX_FONT_SIZE) size = LABEL_MAX_FONT_SIZE;
+        if(size < LABEL_MIN_FONT_SIZE) size = LABEL_MIN_FONT_SIZE;
+
+        this._nothing_label.style = 'font-size: %spx;'.format(size);
+    },
+
     _resize_icons: function() {
         let allocation_box = this.actor.get_allocation_box();
         let width = allocation_box.x2 - allocation_box.x1;
@@ -221,7 +260,7 @@ const AnswersView = new Lang.Class({
 
         let button_size = Math.min(
             Math.round(height * 0.1),
-            ICON_MAX_SIZE
+            BUTTON_ICON_MAX_SIZE
         );
         this._prev_btn.child.icon_size = button_size;
         this._next_btn.child.icon_size = button_size;
@@ -307,23 +346,78 @@ const AnswersView = new Lang.Class({
         });
     },
 
-    _show_icon: function() {
-        if(this._background_icon.opacity === ICON_MAX_OPACITY) return;
-
+    _show_icon: function(icon_name=ICON_NAMES.DEFAULT) {
         Tweener.removeTweens(this._background_icon);
-        Tweener.addTween(this._background_icon, {
-            opacity: ICON_MAX_OPACITY,
-            time: RESULTS_ANIMATION_TIME,
+
+        if(this._background_icon.icon_name !== icon_name) {
+            Tweener.addTween(this._background_icon, {
+                opacity: 170,
+                time: RESULTS_ANIMATION_TIME / 2,
+                transition: 'easeOutQuad',
+                onComplete: Lang.bind(this, function() {
+                    this._background_icon.icon_name = icon_name;
+                    Tweener.addTween(this._background_icon, {
+                        opacity: ICON_MAX_OPACITY,
+                        time: RESULTS_ANIMATION_TIME / 2,
+                        transition: 'easeOutQuad'
+                    });
+                })
+            });
+
+        }
+        else {
+            Tweener.addTween(this._background_icon, {
+                opacity: ICON_MAX_OPACITY,
+                time: RESULTS_ANIMATION_TIME,
+                transition: 'easeOutQuad'
+            });
+        }
+    },
+
+    _show_label: function(label) {
+        if(label.visible) return;
+
+        label.opacity = 0;
+        label.show();
+
+        Tweener.removeTweens(label);
+        Tweener.addTween(label, {
+            opacity: 255,
+            time: LABEL_ANIMATION_TIME,
             transition: 'easeOutQuad'
         });
     },
 
-    set_answers: function(answers) {
+    _hide_label: function(label) {
+        if(!label.visible) return;
+
+        Tweener.removeTweens(label);
+        Tweener.addTween(label, {
+            opacity: 0,
+            time: LABEL_ANIMATION_TIME,
+            transition: 'easeOutQuad',
+            onComplete: Lang.bind(this, function() {
+                label.hide();
+                label.opacity = 255;
+            })
+        });
+    },
+
+    set_answers: function(answers=null) {
         if(this._animation_running) {
             Tweener.removeTweens(this._scroll_view);
             this._scroll_view.opacity = 255;
             this._animation_running = false;
             this._hide_icon();
+        }
+
+        if(answers === null || answers.length < 1) {
+            this._show_icon(ICON_NAMES.NOTHING_FOUND);
+            this._show_label(this._nothing_label);
+            return;
+        }
+        else {
+            this._hide_label(this._nothing_label);
         }
 
         let prev_n_results = this.n_results;
@@ -352,15 +446,7 @@ const AnswersView = new Lang.Class({
         });
     },
 
-    clear: function(animate_out) {
-        if(this._answer_views.length < 1) return;
-
-        animate_out = (
-            animate_out === undefined
-            ? false
-            : animate_out
-        );
-
+    clear: function(animate_out=false) {
         if(animate_out) {
             this._animation_running = true;
             this._show_icon();
@@ -369,6 +455,7 @@ const AnswersView = new Lang.Class({
             this._page_indicators.animate_indicators(
                 PageIndicators.ANIMATION_DIRECTION.OUT
             );
+            this._hide_label(this._nothing_label);
 
             Tweener.removeTweens(this._scroll_view);
             Tweener.addTween(this._scroll_view, {
