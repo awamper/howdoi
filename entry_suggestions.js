@@ -529,7 +529,18 @@ const EntrySuggestions = new Lang.Class({
         let real_length = this._suggestion_items[0].suggestion.text.length;
         this._ignore_text_change = true;
         this._entry.set_text(suggestion_item.suggestion.text);
-        this._entry.clutter_text.set_selection(real_length, -1);
+
+        let should_select = Utils.starts_with(
+            suggestion_item.suggestion.text,
+            this._suggestion_items[0].suggestion.text
+        ) && this._suggestion_items.indexOf(suggestion_item) > 0;
+
+        if(should_select) {
+            this._entry.clutter_text.set_selection(real_length, -1);
+        }
+        else {
+            this._entry.clutter_text.set_cursor_position(-1);
+        }
 
         let index = this._suggestion_items.indexOf(suggestion_item);
         if(suggestion_item.has_calc_result || index === 0) return;
