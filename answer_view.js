@@ -222,6 +222,25 @@ const AnswerView = new Lang.Class({
         this._scroll.height = height;
     },
 
+    scroll_step_up: function() {
+        let value = this._scroll.vscroll.adjustment.value;
+        let step_increment = this._scroll.vscroll.adjustment.step_increment;
+
+        if(value > 0) {
+            this._scroll.vscroll.adjustment.value = value - step_increment;
+        }
+    },
+
+    scroll_step_down: function() {
+        let value = this._scroll.vscroll.adjustment.value;
+        let step_increment = this._scroll.vscroll.adjustment.step_increment;
+        let upper = this._scroll.vscroll.adjustment.upper;
+
+        if(value < upper) {
+            this._scroll.vscroll.adjustment.value = value + step_increment;
+        }
+    },
+
     destroy: function() {
         this._remove_timeout();
         this._copy_button.destroy();

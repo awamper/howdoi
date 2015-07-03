@@ -192,6 +192,16 @@ const HowDoI = new Lang.Class({
             this._answers_view.prev_page();
             return Clutter.EVENT_STOP;
         }
+        else if(control && symbol === Clutter.Up) {
+            let active_answer = this._answers_view.active_answer
+            if(active_answer) this._answers_view.active_answer.scroll_step_up();
+            return Clutter.EVENT_STOP;
+        }
+        else if(control && symbol === Clutter.Down) {
+            let active_answer = this._answers_view.active_answer;
+            if(active_answer) active_answer.scroll_step_down();
+            return Clutter.EVENT_STOP;
+        }
 
         return Clutter.EVENT_PROPAGATE;
     },
