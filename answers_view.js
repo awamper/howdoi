@@ -272,8 +272,8 @@ const AnswersView = new Lang.Class({
         );
     },
 
-    _add_answer: function(answer_text) {
-        let answer_view = new AnswerView.AnswerView(answer_text);
+    _add_answer: function(answer) {
+        let answer_view = new AnswerView.AnswerView(answer);
         this._box.add(answer_view.actor, {
             expand: true,
             x_fill: false,
@@ -318,7 +318,7 @@ const AnswersView = new Lang.Class({
         });
     },
 
-    set_answers: function(answer_texts) {
+    set_answers: function(answers) {
         if(this._animation_running) {
             Tweener.removeTweens(this._scroll_view);
             this._scroll_view.opacity = 255;
@@ -326,21 +326,16 @@ const AnswersView = new Lang.Class({
             this._hide_icon();
         }
 
-        if(typeof answer_texts === 'string') {
-            if(!Utils.is_blank(answer_texts)) answer_texts = [answer_texts];
-            else answer_texts = [];
-        }
-
         let prev_n_results = this.n_results;
-        this.clear(answer_texts.length === 0);
+        this.clear(answers.length === 0);
 
-        for each(let answer_text in answer_texts) {
+        for each(let answer_text in answers) {
             if(Utils.is_blank(answer_text)) continue;
             this._add_answer(answer_text);
         }
 
         this.current_page = 0;
-        this._page_indicators.n_pages = answer_texts.length;
+        this._page_indicators.n_pages = answers.length;
         this._page_indicators.current_page = this.current_page;
 
         if(!this.active_answer || prev_n_results > 0) return;
