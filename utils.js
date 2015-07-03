@@ -40,7 +40,7 @@ const HTTP_CACHE = new Soup.Cache({
 });
 const HTTP_SESSION = new Soup.Session({
     user_agent: DEFAULT_USER_AGENT,
-    timeout: 2
+    timeout: 5
 });
 Soup.Session.prototype.add_feature.call(
     HTTP_SESSION,
