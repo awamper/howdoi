@@ -207,6 +207,8 @@ const HowDoI = new Lang.Class({
     },
 
     _search: function(query) {
+        if(Utils.is_blank(query)) return;
+
         this._progress_bar.pulse_mode = true;
         this._progress_bar.start();
         this._progress_bar.show();
