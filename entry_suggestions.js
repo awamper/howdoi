@@ -524,6 +524,8 @@ const EntrySuggestions = new Lang.Class({
 
     select_suggestion: function(suggestion_item) {
         this._remove_timeouts();
+        if(!suggestion_item) return;
+
         this.unselect_all();
         suggestion_item.actor.add_style_pseudo_class('selected');
 
