@@ -719,6 +719,10 @@ const EntrySuggestions = new Lang.Class({
         CONNECTION_IDS.ENABLE_SUGGESTIONS = 0;
 
         this.parent();
+    },
+
+    set ignore_change(ignore) {
+        this._ignore_text_change = ignore;
     }
 });
 Signals.addSignalMethods(EntrySuggestions.prototype);
