@@ -59,5 +59,13 @@
         <default>5</default>
     </key>
 
+    <key type="as" name="history">
+        <default>[]</default>
+    </key>
+
+    <key type="i" name="history-limit">
+        <default>100</default>
+    </key>
+
   </schema>
 </schemalist>

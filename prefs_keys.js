@@ -29,3 +29,5 @@ const HIDE_PAGE_INDICATORS = 'hide-page-indicators';
 const USE_GOOGLE_SEARCH = 'use-google-search';
 const DEFAULT_SITE = 'default-site';
 const MAX_ANSWERS = 'max-answers';
+const HISTORY = 'history';
+const HISTORY_LIMIT = 'history-limit';
