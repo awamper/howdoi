@@ -222,7 +222,7 @@ const EntrySuggestions = new Lang.Class({
                 }
             }
             else {
-                this.show();
+                if(!this.is_empty()) this.show();
             }
         }
         else if(Utils.symbol_is_tab(symbol)) {
@@ -705,6 +705,10 @@ const EntrySuggestions = new Lang.Class({
                 this.shown = false;
             })
         });
+    },
+
+    is_empty: function() {
+        return this._suggestion_items.length < 1;
     },
 
     destroy: function() {
