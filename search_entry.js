@@ -23,7 +23,9 @@ const ExtensionUtils = imports.misc.extensionUtils;
 
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
+const PrefsKeys = Me.imports.prefs_keys;
 const EntrySuggestions = Me.imports.entry_suggestions;
+const HistoryManager = Me.imports.history_manager;
 
 const SearchEntry = new Lang.Class({
     Name: 'HowDoISeachEntry',
@@ -65,6 +67,12 @@ const SearchEntry = new Lang.Class({
         });
         this.actor.set_secondary_icon(this._secondary_icon);
 
+        this._history = new HistoryManager.HistoryManager({
+            key: PrefsKeys.HISTORY,
+            limit: Utils.SETTINGS.get_int(PrefsKeys.HISTORY_LIMIT),
+            settings: Utils.SETTINGS
+        });
+
         this._entry_suggestions =
             new EntrySuggestions.EntrySuggestions(this.actor);
         this._entry_suggestions.connect(
@@ -76,6 +84,8 @@ const SearchEntry = new Lang.Class({
     _on_text_changed: function() {
         if(this.is_empty()) this._secondary_icon.hide();
         else this._secondary_icon.show();
+
+        if(this.is_empty()) this._history.reset();
 
         return Clutter.EVENT_STOP;
     },
@@ -99,11 +109,41 @@ const SearchEntry = new Lang.Class({
                 return Clutter.EVENT_STOP;
             }
         }
+        else if(symbol === Clutter.Up && !control && !shift) {
+            if(this._entry_suggestions.shown) return Clutter.EVENT_PROPAGATE;
+            let prev = this._history.prev();
+
+            if(prev) {
+                this._entry_suggestions.ignore_change = true;
+                this.set_text(prev);
+                return Clutter.EVENT_STOP;
+            }
+            else {
+                return Clutter.EVENT_PROPAGATE;
+            }
+        }
+        else if(symbol === Clutter.Down && !control && !shift) {
+            if(this._entry_suggestions.shown) return Clutter.EVENT_PROPAGATE;
+            let next = this._history.next();
+
+            if(next) {
+                this._entry_suggestions.ignore_change = true;
+                this.set_text(next);
+                return Clutter.EVENT_STOP;
+            }
+            else {
+                this._entry_suggestions.ignore_change = true;
+                this.set_text('');
+                return Clutter.EVENT_PROPAGATE;
+            }
+        }
 
         return Clutter.EVENT_PROPAGATE;
     },
 
     _activate: function() {
+        this._history.add(this.text);
+        this._history.reset();
         this.emit('activate');
     },
 
@@ -136,6 +176,7 @@ const SearchEntry = new Lang.Class({
     },
 
     destroy: function() {
+        this._history.destroy();
         this._entry_suggestions.destroy();
         this._secondary_icon.destroy();
         this.actor.destroy();
