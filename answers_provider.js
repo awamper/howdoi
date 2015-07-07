@@ -34,6 +34,12 @@ const Answer = new Lang.Class({
         for each(let key in Object.keys(data)) {
             this[key] = data[key];
         }
+
+    },
+
+    get markup() {
+        let allowed_tags = '<b><big><i><s><sub><sup><small><tt><u>';
+        return Utils.strip_tags(this.body, allowed_tags);
     }
 });
 

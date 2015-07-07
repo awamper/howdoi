@@ -50,6 +50,7 @@ const AnswerView = new Lang.Class({
         });
         this._clutter_text = this._entry.get_clutter_text();
         this._clutter_text.set_selectable(true);
+        this._clutter_text.set_editable(true);
         this._clutter_text.set_single_line_mode(false);
         this._clutter_text.set_activatable(false);
         this._clutter_text.set_line_wrap(true);
@@ -211,7 +212,7 @@ const AnswerView = new Lang.Class({
 
     set_answer: function(answer) {
         this._answer = answer;
-        this._entry.set_text(answer.body);
+        this._clutter_text.set_markup(answer.markup);
     },
 
     set_width: function(width) {
