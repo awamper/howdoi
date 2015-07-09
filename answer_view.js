@@ -28,6 +28,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
+const Answer = Me.imports.answer;
 const PopupDialog = Me.imports.popup_dialog;
 
 const COPY_SELECTION_TIMEOUT_MS = 400;
@@ -48,9 +49,10 @@ const AnswerView = new Lang.Class({
         this._entry = new St.Entry({
             style_class: 'howdoi-answer-view-entry'
         });
+
         this._clutter_text = this._entry.get_clutter_text();
         this._clutter_text.set_selectable(true);
-        this._clutter_text.set_editable(true);
+        this._clutter_text.set_editable(false);
         this._clutter_text.set_single_line_mode(false);
         this._clutter_text.set_activatable(false);
         this._clutter_text.set_line_wrap(true);
@@ -210,9 +212,34 @@ const AnswerView = new Lang.Class({
         });
     },
 
+    _get_markup: function(answer) {
+        let markup = '';
+
+        for each(let block in answer.get_text_blocks()) {
+            if(block.type === Answer.BLOCK_TYPE.CODE) {
+                markup +=
+                    '<span bgcolor="#CCCCCC" fgcolor="#222222"><tt>%s</tt></span>'.format(
+                        block.content
+                    );
+            }
+            else if(block.type === Answer.BLOCK_TYPE.BLOCKQUOTE) {
+                markup +=
+                    '<span bgcolor="#FFEEB0" fgcolor="#222222">%s</span>'.format(
+                        block.content
+                    );
+            }
+            else {
+                markup += block.content;
+            }
+        }
+
+        return markup;
+    },
+
     set_answer: function(answer) {
         this._answer = answer;
-        this._clutter_text.set_markup(answer.markup);
+        let markup = this._get_markup(answer);
+        this._clutter_text.set_markup(markup);
     },
 
     set_width: function(width) {
