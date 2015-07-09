@@ -15,7 +15,6 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-const St = imports.gi.St;
 const Lang = imports.lang;
 const ExtensionUtils = imports.misc.extensionUtils;
 
@@ -24,24 +23,9 @@ const Utils = Me.imports.utils;
 const PrefsKeys = Me.imports.prefs_keys;
 const StackExchange = Me.imports.stack_exchange;
 const GoogleSearch = Me.imports.google_search;
+const Answer = Me.imports.answer;
 
 const QUESTION_ID_REGEXP = /\/questions\/(\d+)\//i;
-
-const Answer = new Lang.Class({
-    Name: 'HowDoIAnswer',
-
-    _init: function(data) {
-        for each(let key in Object.keys(data)) {
-            this[key] = data[key];
-        }
-
-    },
-
-    get markup() {
-        let allowed_tags = '<b><big><i><s><sub><sup><small><tt><u>';
-        return Utils.strip_tags(this.body, allowed_tags);
-    }
-});
 
 const AnswersProvider = new Lang.Class({
     Name: 'HowDoIAnswersProvider',
@@ -133,7 +117,7 @@ const AnswersProvider = new Lang.Class({
                         for each(let answer in answers) {
                             let index = ids.indexOf(parseInt(answer.question_id));
                             if(index === -1) continue;
-                            result.splice(index, 0, new Answer(answer));
+                            result.splice(index, 0, new Answer.Answer(answer));
                         }
                         result = result.filter(function(n) { return n !== undefined });
                         callback(result);
