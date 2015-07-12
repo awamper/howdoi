@@ -106,6 +106,7 @@
 .howdoi-answer-view {
     background-color: #292929;
     border: 1px solid rgba(154, 154, 142, 0.5);
+    padding: 20px;
 }
 
 .howdoi-answer-view StScrollView StScrollBar {
@@ -121,7 +122,7 @@
 
 .howdoi-answer-view StScrollBar StBin#vhandle {
     background-color: rgba(255, 255, 255, 0.2);
-    border: 1px solid #242424;
+    /*border: 1px solid #242424;*/
     border-radius: 0px;
     transition-duration: 300ms;
 }
@@ -147,17 +148,35 @@
 
 .howdoi-answer-view-entry {
     box-shadow: none;
-    padding: 20px;
     color: white;
     font-size: 20px;
     border: 1px solid transparent;
+    border-radius: 0px;
 }
 
 .howdoi-answer-view-entry:focus {
-    padding: 20px;
     font-size: 20px;
     box-shadow: none;
     border: 1px solid transparent;
+    border-radius: 0px;
+}
+
+.howdoi-answer-view-entry:code {
+    font-size: 20px;
+    box-shadow: none;
+    border: 1px solid transparent;
+    border-radius: 0px;
+    background-color: #CCCCCC;
+    color: #222222;
+}
+
+.howdoi-answer-view-entry:blockquote {
+    font-size: 20px;
+    box-shadow: none;
+    border: 1px solid transparent;
+    border-radius: 0px;
+    background-color: #FFEEB0;
+    color: #222222;
 }
 
 .howdoi-next-page-button, .howdoi-prev-page-button {
@@ -177,7 +196,6 @@
     border: 1px solid black;
     padding: 5px;
     color: #C4C4C4;
-    max-width: 200px;
     font-size: 14px;
     font-weight: bold;
 }
