@@ -17,24 +17,14 @@
 
 const St = imports.gi.St;
 const Lang = imports.lang;
-const Mainloop = imports.mainloop;
-const GLib = imports.gi.GLib;
 const Clutter = imports.gi.Clutter;
-const Pango = imports.gi.Pango;
 const Gtk = imports.gi.Gtk;
-const Tweener = imports.ui.tweener;
-const Main = imports.ui.main;
 const ExtensionUtils = imports.misc.extensionUtils;
 
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const Answer = Me.imports.answer;
-const PopupDialog = Me.imports.popup_dialog;
-
-const COPY_SELECTION_TIMEOUT_MS = 400;
-const TIMEOUT_IDS = {
-    SELECTION: 0
-};
+const TextBlockEntry = Me.imports.text_block_entry;
 
 const AnswerView = new Lang.Class({
     Name: 'HowDoIAnswerView',
@@ -46,48 +36,6 @@ const AnswerView = new Lang.Class({
 
         this._answer = null;
 
-        this._entry = new St.Entry({
-            style_class: 'howdoi-answer-view-entry'
-        });
-
-        this._clutter_text = this._entry.get_clutter_text();
-        this._clutter_text.set_selectable(true);
-        this._clutter_text.set_editable(false);
-        this._clutter_text.set_single_line_mode(false);
-        this._clutter_text.set_activatable(false);
-        this._clutter_text.set_line_wrap(true);
-        this._clutter_text.set_max_length(0);
-        this._clutter_text.set_line_wrap_mode(
-            Pango.WrapMode.WORD_CHAR
-        );
-        this._clutter_text.connect('cursor-changed',
-            Lang.bind(this, this._on_cursor_changed)
-        );
-        this._clutter_text.connect('key-focus-out',
-            Lang.bind(this, function() {
-                this._hide_button();
-                return Clutter.EVENT_PROPAGATE;
-            })
-        );
-        this._clutter_text.connect('leave-event',
-            Lang.bind(this, function() {
-                if(Utils.is_pointer_inside_actor(this._copy_button)) {
-                    return Clutter.EVENT_PROPAGATE;
-                }
-
-                this._hide_button();
-                return Clutter.EVENT_PROPAGATE;
-            })
-        );
-
-        this._box = new St.BoxLayout({
-            vertical: true
-        });
-        this._box.add(this._entry, {
-            y_align: St.Align.START,
-            y_fill: false
-        });
-
         this._scroll = new St.ScrollView({
             style_class: 'howdoi-answer-view'
         });
@@ -95,151 +43,87 @@ const AnswerView = new Lang.Class({
             Gtk.PolicyType.NEVER,
             Gtk.PolicyType.AUTOMATIC
         );
-        this._scroll.set_overlay_scrollbars(true);
-        this._scroll.add_actor(this._box);
-
         this.actor.add(this._scroll, {
             x_fill: true,
             y_fill: true,
             expand: true
         });
 
-        this._copy_button = new St.Button({
-            label: 'copy selection',
-            style_class: 'howdoi-copy-button',
-            visible: false
-        });
-        this._copy_button.connect('clicked',
-            Lang.bind(this, function() {
-                this._hide_button();
-                let selection = this._clutter_text.get_selection();
-                if(Utils.is_blank(selection)) return;
-
-                St.Clipboard.get_default().set_text(
-                    St.ClipboardType.CLIPBOARD,
-                    selection
-                );
-            })
-        );
-        Main.uiGroup.add_child(this._copy_button);
-
         this.set_answer(answer);
     },
 
-    _on_cursor_changed: function() {
-        this._remove_timeout();
-        let selection = this._clutter_text.get_selection();
+    set_answer: function(answer) {
+        function dump_text() {
+            if(Utils.is_blank(text_block)) return;
 
-        if(Utils.is_blank(selection)) {
-            this._hide_button();
-            return Clutter.EVENT_STOP;
+            let block = {
+                type: Answer.BLOCK_TYPE.TEXT,
+                content: text_block
+            };
+            let label = new TextBlockEntry.TextBlockEntry(block);
+            box.add(label.actor, {
+                expand: false,
+                x_fill: false,
+                y_fill: false,
+                x_align: St.Align.START,
+                y_align: St.Align.START
+            });
+            text_block = '';
         }
 
-        TIMEOUT_IDS.SELECTION = Mainloop.timeout_add(
-            COPY_SELECTION_TIMEOUT_MS,
-            Lang.bind(this, function() {
-                this._remove_timeout();
-                this._show_button();
-                return GLib.SOURCE_REMOVE;
-            })
-        );
+        this._answer = answer;
 
-        return Clutter.EVENT_STOP;
-    },
-
-    _remove_timeout: function() {
-        if(TIMEOUT_IDS.SELECTION > 0) {
-            Mainloop.source_remove(TIMEOUT_IDS.SELECTION);
-            TIMEOUT_IDS.SELECTION = 0;
-        }
-    },
-
-    _show_button: function() {
-        if(this._copy_button.visible) return;
-
-        Main.uiGroup.set_child_above_sibling(this._copy_button, null);
-        let [pointer_x, pointer_y] = global.get_pointer();
-        this._copy_button.translation_x = pointer_x + 5;
-        this._copy_button.translation_y = pointer_y + 5;
-
-        this._copy_button.set_pivot_point(0.5, 1.0);
-        this._copy_button.scale_x = 0.01;
-        this._copy_button.scale_y = 0.05;
-        this._copy_button.show();
-
-        Tweener.removeTweens(this._copy_button);
-        Tweener.addTween(this._copy_button, {
-            time: 0.2,
-            scale_x: 1.1,
-            scale_y: 1.1,
-            transition: 'easeOutQuad',
-            onComplete: Lang.bind(this, function() {
-                Tweener.addTween(this._copy_button, {
-                    time: 0.2,
-                    scale_x: 1,
-                    scale_y: 1,
-                    transition: 'easeOutQuad'
-                });
-            })
+        let box = new St.BoxLayout({
+            vertical: true
         });
-    },
+        let text_block = '';
+        let text_blocks = answer.get_text_blocks();
 
-    _hide_button: function() {
-        if(!this._copy_button.visible) return;
+        for each(let block in text_blocks) {
+            if(block.type === Answer.BLOCK_TYPE.TEXT) {
+                text_block += block.content;
+                let is_last = (
+                    text_blocks.indexOf(block) === text_blocks.length - 1
+                );
+                if(is_last) dump_text();
+            }
+            else if(block.type === Answer.BLOCK_TYPE.CODE) {
+                let lines_count = block.content.split('\n').length;
 
-        this._copy_button.set_pivot_point(0.5, 0.5);
-        Tweener.removeTweens(this._copy_button);
-        Tweener.addTween(this._copy_button, {
-            time: 0.1,
-            scale_x: 1.1,
-            scale_y: 1.1,
-            transition: 'easeOutQuad',
-            onComplete: Lang.bind(this, function() {
-                Tweener.addTween(this._copy_button, {
-                    time: 0.2,
-                    opacity: 0,
-                    scale_x: 0,
-                    scale_y: 0,
-                    transition: 'easeOutQuad',
-                    onComplete: Lang.bind(this, function() {
-                        this._copy_button.hide();
-                        this._copy_button.opacity = 255;
-                        this._copy_button.scale_x = 1;
-                        this._copy_button.scale_y = 1;
-                    })
-                });
-            })
-        });
-    },
-
-    _get_markup: function(answer) {
-        let markup = '';
-
-        for each(let block in answer.get_text_blocks()) {
-            if(block.type === Answer.BLOCK_TYPE.CODE) {
-                markup +=
-                    '<span bgcolor="#CCCCCC" fgcolor="#222222"><tt>%s</tt></span>'.format(
-                        block.content
+                if(lines_count < 2) {
+                    text_block += (
+                        '<span bgcolor="#CCCCCC" fgcolor="#222222"><tt>' +
+                        '%s</tt></span>'.format(block.content)
                     );
+                }
+                else {
+                    dump_text();
+
+                    let entry = new TextBlockEntry.TextBlockEntry(block);
+                    box.add(entry.actor, {
+                        expand: false,
+                        x_fill: false,
+                        y_fill: false,
+                        x_align: St.Align.START,
+                        y_align: St.Align.START
+                    });
+                }
             }
             else if(block.type === Answer.BLOCK_TYPE.BLOCKQUOTE) {
-                markup +=
-                    '<span bgcolor="#FFEEB0" fgcolor="#222222">%s</span>'.format(
-                        block.content
-                    );
-            }
-            else {
-                markup += block.content;
+                dump_text();
+
+                let entry = new TextBlockEntry.TextBlockEntry(block);
+                box.add(entry.actor, {
+                    expand: false,
+                    x_fill: false,
+                    y_fill: false,
+                    x_align: St.Align.START,
+                    y_align: St.Align.START
+                });
             }
         }
 
-        return markup;
-    },
-
-    set_answer: function(answer) {
-        this._answer = answer;
-        let markup = this._get_markup(answer);
-        this._clutter_text.set_markup(markup);
+        this._scroll.add_actor(box);
     },
 
     set_width: function(width) {
@@ -270,8 +154,6 @@ const AnswerView = new Lang.Class({
     },
 
     destroy: function() {
-        this._remove_timeout();
-        this._copy_button.destroy();
         this._answer = null;
         this.actor.destroy();
     },
