@@ -103,7 +103,7 @@ const TextBlockEntry = new Lang.Class({
         );
         Main.uiGroup.add_child(this._copy_button);
 
-        this.set_text_block(text_block);
+        this.set(text_block);
     },
 
     _on_cursor_changed: function() {
@@ -207,7 +207,7 @@ const TextBlockEntry = new Lang.Class({
         this.actor.destroy();
     },
 
-    set_text_block: function(text_block) {
+    set: function(text_block) {
         let color_bin = new St.Bin({
             width: 5
         });
