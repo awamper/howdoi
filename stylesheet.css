@@ -179,6 +179,13 @@
     color: #222222;
 }
 
+.howdoi-answer-view-title {
+    font-size: 35px;
+    text-decoration: underline;
+    padding-bottom: 20px;
+    color: #006AFF;
+}
+
 .howdoi-next-page-button, .howdoi-prev-page-button {
     color: rgba(255, 255, 255, 0.4);
 }

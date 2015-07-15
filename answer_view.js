@@ -31,7 +31,8 @@ const AnswerView = new Lang.Class({
 
     _init: function(answer) {
         this.actor = new St.BoxLayout({
-            reactive: true
+            reactive: true,
+            vertical: true
         });
 
         this._answer = null;
@@ -76,6 +77,18 @@ const AnswerView = new Lang.Class({
         let box = new St.BoxLayout({
             vertical: true
         });
+        let title = new St.Label({
+            style_class: 'howdoi-answer-view-title',
+            text: 'Q: ' + this._answer.title
+        });
+        box.add(title, {
+            x_fill: true,
+            y_fill: false,
+            expand: true,
+            x_align: St.Align.START,
+            y_align: St.Align.MIDDLE
+        });
+
         let text_block = '';
         let text_blocks = answer.get_text_blocks();
 
