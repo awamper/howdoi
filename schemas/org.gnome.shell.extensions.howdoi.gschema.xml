@@ -67,5 +67,9 @@
         <default>100</default>
     </key>
 
+    <key type="b" name="question-title">
+        <default>true</default>
+    </key>
+
   </schema>
 </schemalist>

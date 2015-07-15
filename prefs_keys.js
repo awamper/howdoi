@@ -31,3 +31,4 @@ const DEFAULT_SITE = 'default-site';
 const MAX_ANSWERS = 'max-answers';
 const HISTORY = 'history';
 const HISTORY_LIMIT = 'history-limit';
+const QUESTION_TITLE = 'question-title';

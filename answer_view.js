@@ -23,6 +23,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
+const PrefsKeys = Me.imports.prefs_keys;
 const Answer = Me.imports.answer;
 const TextBlockEntry = Me.imports.text_block_entry;
 
@@ -77,17 +78,20 @@ const AnswerView = new Lang.Class({
         let box = new St.BoxLayout({
             vertical: true
         });
-        let title = new St.Label({
-            style_class: 'howdoi-answer-view-title',
-            text: 'Q: ' + this._answer.title
-        });
-        box.add(title, {
-            x_fill: true,
-            y_fill: false,
-            expand: true,
-            x_align: St.Align.START,
-            y_align: St.Align.MIDDLE
-        });
+
+        if(Utils.SETTINGS.get_boolean(PrefsKeys.QUESTION_TITLE)) {
+            let title = new St.Label({
+                style_class: 'howdoi-answer-view-title',
+                text: 'Q: ' + this._answer.title
+            });
+            box.add(title, {
+                x_fill: true,
+                y_fill: false,
+                expand: true,
+                x_align: St.Align.START,
+                y_align: St.Align.MIDDLE
+            });
+        }
 
         let text_block = '';
         let text_blocks = answer.get_text_blocks();

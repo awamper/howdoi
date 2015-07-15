@@ -414,6 +414,10 @@ const HowDoIPrefsWidget = new GObject.Class({
         );
 
         page.add_boolean(
+            'Show question title:',
+            PrefsKeys.QUESTION_TITLE
+        );
+        page.add_boolean(
             'Hide page indicators:',
             PrefsKeys.HIDE_PAGE_INDICATORS
         );
