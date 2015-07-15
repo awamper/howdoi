@@ -18,7 +18,9 @@
 const St = imports.gi.St;
 const Lang = imports.lang;
 const Clutter = imports.gi.Clutter;
+const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
+const Meta = imports.gi.Meta;
 const ExtensionUtils = imports.misc.extensionUtils;
 
 const Me = ExtensionUtils.getCurrentExtension();
@@ -26,6 +28,52 @@ const Utils = Me.imports.utils;
 const PrefsKeys = Me.imports.prefs_keys;
 const Answer = Me.imports.answer;
 const TextBlockEntry = Me.imports.text_block_entry;
+const Extension = Me.imports.extension;
+
+const QuestionTitle = new Lang.Class({
+    Name: 'HowDoIQuestionTitle',
+
+    _init: function(answer) {
+        this.actor = new St.BoxLayout();
+
+        this._label = new St.Label({
+            style_class: 'howdoi-answer-view-title',
+            reactive: true
+        });
+        this._label.connect('enter-event',
+            Lang.bind(this, function() {
+                global.screen.set_cursor(Meta.Cursor.POINTING_HAND);
+            })
+        );
+        this._label.connect('leave-event',
+            Lang.bind(this, function() {
+                global.screen.set_cursor(Meta.Cursor.DEFAULT);
+            })
+        );
+        this._label.connect('button-release-event',
+            Lang.bind(this, function() {
+                Gio.app_info_launch_default_for_uri(
+                    answer.share_link,
+                    Utils.make_launch_context()
+                );
+                Extension.howdoi.hide();
+            })
+        );
+        this.actor.add(this._label, {
+            x_fill: false,
+            y_fill: false,
+            expand: false,
+            x_align: St.Align.START,
+            y_align: St.Align.MIDDLE
+        });
+
+        this.set_title(answer.title);
+    },
+
+    set_title: function(title) {
+        this._label.set_text('Q: ' + title);
+    }
+});
 
 const AnswerView = new Lang.Class({
     Name: 'HowDoIAnswerView',
@@ -80,11 +128,8 @@ const AnswerView = new Lang.Class({
         });
 
         if(Utils.SETTINGS.get_boolean(PrefsKeys.QUESTION_TITLE)) {
-            let title = new St.Label({
-                style_class: 'howdoi-answer-view-title',
-                text: 'Q: ' + this._answer.title
-            });
-            box.add(title, {
+            let title = new QuestionTitle(this._answer);
+            box.add(title.actor, {
                 x_fill: true,
                 y_fill: false,
                 expand: true,

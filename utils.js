@@ -19,6 +19,7 @@ const Gio = imports.gi.Gio;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Clutter = imports.gi.Clutter;
 const Soup = imports.gi.Soup;
+const Params = imports.misc.params;
 
 const SPINNER_ICON = global.datadir + '/theme/process-working.svg';
 const SPINNER_ICON_SIZE = 24;
@@ -333,4 +334,18 @@ function strip_tags(input, allowed) {
     .replace(tags, function($0, $1) {
       return allowed.indexOf('<' + $1.toLowerCase() + '>') > -1 ? $0 : '';
     });
+}
+
+function make_launch_context(params={}) {
+    params = Params.parse(params, {
+        workspace: -1,
+        timestamp: global.display.get_current_time_roundtrip()
+    });
+
+    let launch_context = global.create_app_launch_context(
+        params.timestamp,
+        params.workspace
+    );
+
+    return launch_context;
 }
