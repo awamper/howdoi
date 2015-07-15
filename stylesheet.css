@@ -228,3 +228,15 @@
     font-size: 50px;
     color: rgba(255, 255, 255, 0.5);
 }
+
+.howdoi-copy-block-button {
+    color: rgba(0, 106, 255, 0.5);
+}
+
+.howdoi-copy-block-button:hover {
+    color: rgba(0, 106, 255, 0.8);
+}
+
+.howdoi-copy-block-button:active {
+    color: rgba(0, 106, 255, 1);
+}

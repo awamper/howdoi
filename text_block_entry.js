@@ -232,5 +232,13 @@ const TextBlockEntry = new Lang.Class({
         }
 
         this._clutter_text.set_markup(markup);
+    },
+
+    get entry() {
+        return this._entry;
+    },
+
+    get text() {
+        return this._entry.get_text();
     }
 });

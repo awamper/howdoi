@@ -21,6 +21,7 @@ const Clutter = imports.gi.Clutter;
 const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
 const Meta = imports.gi.Meta;
+const Main = imports.ui.main;
 const ExtensionUtils = imports.misc.extensionUtils;
 
 const Me = ExtensionUtils.getCurrentExtension();
@@ -75,6 +76,113 @@ const QuestionTitle = new Lang.Class({
     }
 });
 
+const CopyBlockButton = new Lang.Class({
+    Name: 'HowDoIAnswerCopyBlockButton',
+
+    _init: function(answer_view, text_block_entry) {
+        let icon = new St.Icon({
+            icon_name: 'edit-copy-symbolic',
+            icon_size: 30
+        });
+        this.actor = new St.Button({
+            child: icon,
+            visible: false,
+            style_class: 'howdoi-copy-block-button'
+        });
+        this.actor.connect('clicked',
+            Lang.bind(this, function() {
+                St.Clipboard.get_default().set_text(
+                    St.ClipboardType.CLIPBOARD,
+                    text_block_entry.text
+                );
+            })
+        );
+
+        this._connection_ids = {
+            ENTRY_ENTER: 0,
+            ENTRY_LEAVE: 0,
+            SCROLL: 0
+        };
+        this._block_entry = text_block_entry;
+        this._answer_view = answer_view;
+        this._v_adjustment = this._answer_view.scroll.vscroll.adjustment;
+
+        this._connection_ids.ENTRY_ENTER =
+            this._block_entry.entry.connect(
+                'enter-event',
+                Lang.bind(this, this.show_or_hide)
+            );
+        this._connection_ids.ENTRY_LEAVE =
+            this._block_entry.entry.connect(
+                'leave-event',
+                Lang.bind(this, function() {
+                    if(!Utils.is_pointer_inside_actor(this.actor)) {
+                        this.hide();
+                    }
+                })
+            );
+        this._connection_ids.SCROLL =
+            this._v_adjustment.connect(
+                'notify::value',
+                Lang.bind(this, this.show_or_hide)
+            );
+
+        Main.uiGroup.add_child(this.actor);
+    },
+
+    _reposition: function() {
+        let margin = 10;
+        let [x, y] = this._block_entry.actor.get_transformed_position();
+        this.actor.x = (
+            this._block_entry.actor.width +
+            x - this.actor.width - margin
+        );
+        this.actor.y = y + margin;
+    },
+
+    show: function() {
+        this.actor.show();
+        this._reposition();
+        Main.uiGroup.set_child_above_sibling(this.actor, null);
+    },
+
+    hide: function() {
+        if(!this.actor.visible) return;
+        this.actor.hide();
+    },
+
+    show_or_hide: function() {
+        let [answer_x, answer_y] =
+            this._answer_view.actor.get_transformed_position();
+        let [block_x, block_y] =
+            this._block_entry.actor.get_transformed_position();
+
+        if(!Utils.is_pointer_inside_actor(this._block_entry.entry)) this.hide();
+        else if(block_y > answer_y) this.show();
+        else this.hide();
+    },
+
+    destroy: function() {
+        if(this._connection_ids.ENTRY_ENTER > 0) {
+            this._block_entry.entry.disconnect(this._connection_ids.ENTRY_ENTER);
+            this._connection_ids.ENTRY_ENTER = 0;
+        }
+        if(this._connection_ids.ENTRY_LEAVE > 0) {
+            this._block_entry.entry.disconnect(this._connection_ids.ENTRY_LEAVE);
+            this._connection_ids.ENTRY_LEAVE = 0;
+        }
+        if(this._connection_ids.SCROLL > 0) {
+            this._v_adjustment.disconnect(this._connection_ids.SCROLL);
+            this._connection_ids.SCROLL = 0;
+        }
+
+        this._block_entry = null;
+        this._v_adjustment = null;
+        this._answer_view = null;
+        this.actor.destroy();
+    }
+});
+
 const AnswerView = new Lang.Class({
     Name: 'HowDoIAnswerView',
 
@@ -85,6 +193,7 @@ const AnswerView = new Lang.Class({
         });
 
         this._answer = null;
+        this._copy_buttons = [];
 
         this._scroll = new St.ScrollView({
             style_class: 'howdoi-answer-view'
@@ -100,6 +209,18 @@ const AnswerView = new Lang.Class({
         });
 
         this.set_answer(answer);
+        this._connection_id = Extension.howdoi.connect('closing',
+            Lang.bind(this, this._hide_copy_buttons)
+        );
+    },
+
+    _destroy_copy_buttons: function() {
+        for each(let b in this._copy_buttons) b.destroy();
+        this._copy_buttons = [];
+    },
+
+    _hide_copy_buttons: function() {
+        for each(let b in this._copy_buttons) b.hide();
     },
 
     set_answer: function(answer) {
@@ -162,6 +283,7 @@ const AnswerView = new Lang.Class({
                     dump_text();
 
                     let entry = new TextBlockEntry.TextBlockEntry(block);
+                    this._copy_buttons.push(new CopyBlockButton(this, entry));
                     box.add(entry.actor, {
                         expand: false,
                         x_fill: false,
@@ -216,11 +338,18 @@ const AnswerView = new Lang.Class({
     },
 
     destroy: function() {
+        Extension.howdoi.disconnect(this._connection_id);
+        this._connection_id = 0;
+        this._destroy_copy_buttons();
         this._answer = null;
         this.actor.destroy();
     },
 
     get answer() {
         return this._answer;
+    },
+
+    get scroll() {
+        return this._scroll;
     }
 });

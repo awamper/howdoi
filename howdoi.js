@@ -344,6 +344,7 @@ const HowDoI = new Lang.Class({
     show: function(animation) {
         if(this.shown) return;
 
+        this.emit('showing');
         this._show_background();
         animation =
             animation === undefined
@@ -412,6 +413,7 @@ const HowDoI = new Lang.Class({
     hide: function(animation) {
         if(!this.shown) return;
 
+        this.emit('closing');
         this._hide_background();
         animation =
             animation === undefined
