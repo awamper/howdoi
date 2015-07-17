@@ -29,9 +29,10 @@ const BLOCK_TYPE = {
     BLOCKQUOTE: 2
 };
 const ALLOWED_TAGS =
-    '<b><big><i><s><sub><sup><small><tt><u><em><strong><li>';
+    '<b><big><i><s><sub><sup><small><tt><u><em><strong><li><a>';
 const BLOCK_REGEXP =
     /(<code>)([\s\S]+?)<\/code>|(<blockquote>)([\s\S]+?)<\/blockquote>/ig;
+const LINKS_REGEXP = /<a href="(.*?)".*?>(.*?)<\/a>/gi;
 
 const LIST_ITEM_SYMBOL = '\u2022';
 
@@ -53,6 +54,29 @@ const Answer = new Lang.Class({
         markup = markup.replace(/<\/li>/g, '\n');
 
         return markup;
+    },
+
+    _parse_links: function(block) {
+        let link_maps = [];
+        let match;
+        let new_content = block.content;
+
+        while((match = LINKS_REGEXP.exec(block.content)) !== null) {
+            let url = match[1].trim();
+            let title = match[2];
+            new_content = new_content.replace(match[0], title);
+            let map = {
+                title: title,
+                url: url,
+                start: match.index,
+                stop: match.index + title.length
+            };
+
+            link_maps.push(map);
+        }
+
+        block.content = new_content;
+        block.links = link_maps;
     },
 
     get_text_blocks: function() {
@@ -83,6 +107,7 @@ const Answer = new Lang.Class({
                 type: BLOCK_TYPE.TEXT,
                 content: content
             };
+            this._parse_links(result);
             return [result];
         }
 
@@ -134,6 +159,11 @@ const Answer = new Lang.Class({
             else {
                 last_index = map.stop;
             }
+        }
+
+        for each(let block in text_blocks) {
+            if(block.type === BLOCK_TYPE.CODE) continue;
+            this._parse_links(block);
         }
 
         return text_blocks;
