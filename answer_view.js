@@ -225,13 +225,9 @@ const AnswerView = new Lang.Class({
 
     set_answer: function(answer) {
         function dump_text() {
-            if(Utils.is_blank(text_block)) return;
+            if(Utils.is_blank(text_block.content)) return;
 
-            let block = {
-                type: Answer.BLOCK_TYPE.TEXT,
-                content: text_block
-            };
-            let label = new TextBlockEntry.TextBlockEntry(block);
+            let label = new TextBlockEntry.TextBlockEntry(text_block);
             box.add(label.actor, {
                 expand: false,
                 x_fill: false,
@@ -239,7 +235,9 @@ const AnswerView = new Lang.Class({
                 x_align: St.Align.START,
                 y_align: St.Align.START
             });
-            text_block = '';
+
+            text_block.content = '';
+            text_block.links = [];
         }
 
         this._answer = answer;
@@ -259,12 +257,15 @@ const AnswerView = new Lang.Class({
             });
         }
 
-        let text_block = '';
+        let text_block = {
+            type: Answer.BLOCK_TYPE.TEXT,
+            content: ''
+        };
         let text_blocks = answer.get_text_blocks();
 
         for each(let block in text_blocks) {
             if(block.type === Answer.BLOCK_TYPE.TEXT) {
-                text_block += block.content;
+                text_block.content += block.content;
                 let is_last = (
                     text_blocks.indexOf(block) === text_blocks.length - 1
                 );
@@ -274,7 +275,7 @@ const AnswerView = new Lang.Class({
                 let lines_count = block.content.split('\n').length;
 
                 if(lines_count < 2) {
-                    text_block += (
+                    text_block.content += (
                         '<span bgcolor="#CCCCCC" fgcolor="#222222"><tt>' +
                         '%s</tt></span>'.format(block.content)
                     );
