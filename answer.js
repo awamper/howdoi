@@ -57,26 +57,17 @@ const Answer = new Lang.Class({
     },
 
     _parse_links: function(block) {
-        let link_maps = [];
         let match;
         let new_content = block.content;
 
         while((match = LINKS_REGEXP.exec(block.content)) !== null) {
             let url = match[1].trim();
             let title = match[2];
-            new_content = new_content.replace(match[0], title);
-            let map = {
-                title: title,
-                url: url,
-                start: match.index,
-                stop: match.index + title.length
-            };
-
-            link_maps.push(map);
+            let link_markup = '[a href="%s"]%s[/a]'.format(url, title);
+            new_content = new_content.replace(match[0], link_markup);
         }
 
         block.content = new_content;
-        block.links = link_maps;
     },
 
     get_text_blocks: function() {
