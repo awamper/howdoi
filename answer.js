@@ -87,8 +87,10 @@ const Answer = new Lang.Class({
 
         for each(let map in block_maps) {
             let text_block = Utils.strip_tags(
-                this.body.slice(last_index, map.start)
+                this.body.slice(last_index, map.start),
+                ALLOWED_TAGS
             );
+            text_block = this._replace_markup_tags(text_block)
             if(!Utils.is_blank(text_block)) {
                 text_blocks.push({
                     type: BLOCK_TYPE.TEXT,
@@ -112,7 +114,10 @@ const Answer = new Lang.Class({
             text_blocks.push(block);
 
             if(block_maps.indexOf(map) === block_maps.length - 1) {
-                let last_block = Utils.strip_tags(this.body.slice(map.stop));
+                let last_block = Utils.strip_tags(
+                    this.body.slice(map.stop),
+                    ALLOWED_TAGS
+                );
                 last_block = this._replace_markup_tags(last_block);
 
                 if(!Utils.is_blank(last_block)) {
