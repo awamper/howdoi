@@ -29,9 +29,11 @@ const BLOCK_TYPE = {
     BLOCKQUOTE: 2
 };
 const ALLOWED_TAGS =
-    '<b><big><i><s><sub><sup><small><tt><u><em><strong>';
+    '<b><big><i><s><sub><sup><small><tt><u><em><strong><li>';
 const BLOCK_REGEXP =
     /(<code>)([\s\S]+?)<\/code>|(<blockquote>)([\s\S]+?)<\/blockquote>/ig;
+
+const LIST_ITEM_SYMBOL = '\u2022';
 
 const Answer = new Lang.Class({
     Name: 'HowDoIAnswer',
@@ -47,6 +49,8 @@ const Answer = new Lang.Class({
         markup = markup.replace(/<\/em>/g, '</b>');
         markup = markup.replace(/<strong>/g, '<b>');
         markup = markup.replace(/<\/strong>/g, '</b>');
+        markup = markup.replace(/<li>/g, '<tt> %s </tt>'.format(LIST_ITEM_SYMBOL));
+        markup = markup.replace(/<\/li>/g, '\n');
 
         return markup;
     },
