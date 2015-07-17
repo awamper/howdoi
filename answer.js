@@ -50,7 +50,7 @@ const Answer = new Lang.Class({
         markup = markup.replace(/<\/em>/g, '</b>');
         markup = markup.replace(/<strong>/g, '<b>');
         markup = markup.replace(/<\/strong>/g, '</b>');
-        markup = markup.replace(/<li>/g, '<tt> %s </tt>'.format(LIST_ITEM_SYMBOL));
+        markup = markup.replace(/<li>/g, ' %s '.format(LIST_ITEM_SYMBOL));
         markup = markup.replace(/<\/li>/g, '\n');
 
         return markup;
