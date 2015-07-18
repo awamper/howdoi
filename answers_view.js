@@ -26,6 +26,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const PrefsKeys = Me.imports.prefs_keys;
+const Answer = Me.imports.answer;
 const AnswerView = Me.imports.answer_view;
 const PageIndicators = Me.imports.page_indicators;
 
@@ -115,6 +116,17 @@ const AnswersView = new Lang.Class({
         );
         this._page_indicators.connect('notify::current-page',
             Lang.bind(this, function() {
+                let code_blocks_count = this.active_answer.answer.count_blocks(
+                    Answer.BLOCK_TYPE.CODE
+                );
+                if(code_blocks_count > 0) {
+                    this._copy_code_btn.show();
+                    this._copy_code_btn.remove_style_pseudo_class('disabled');
+                }
+                else {
+                    this._copy_code_btn.add_style_pseudo_class('disabled');
+                }
+
                 if(this._page_indicators.n_pages <= 1) return;
 
                 if(this.current_page >= this._page_indicators.n_pages - 1) {
@@ -220,6 +232,47 @@ const AnswersView = new Lang.Class({
             y_fill: false,
             x_align: St.Align.MIDDLE,
             y_align: St.Align.END
+        });
+
+        let copy_code_icon = new St.Icon({
+            icon_name: 'edit-copy-symbolic',
+            icon_size: 30
+        });
+        this._copy_code_btn = new St.Button({
+            child: copy_code_icon,
+            style_class: 'howdoi-copy-code-button',
+            visible: false
+        });
+        this._copy_code_btn.connect('clicked',
+            Lang.bind(this, function() {
+                if(this._copy_code_btn.has_style_pseudo_class('disabled')) return;
+                let code = '';
+                let text_blocks = this.active_answer.answer.get_text_blocks();
+
+                for each(let block in text_blocks) {
+                    if(block.type === Answer.BLOCK_TYPE.CODE) {
+                        let lines_count = block.content.split('\n').length;
+                        if(lines_count > 1) code += block.content;
+                    }
+                }
+
+                if(!Utils.is_blank(code)) {
+                    St.Clipboard.get_default().set_text(
+                        St.ClipboardType.CLIPBOARD,
+                        code
+                    );
+                }
+            })
+        );
+        this._table.add(this._copy_code_btn, {
+            row: 0,
+            col: 0,
+            row_span: 2,
+            expand: true,
+            x_fill: false,
+            y_fill: false,
+            x_align: St.Align.END,
+            y_align: St.Align.START
         });
 
         this._resize_icons();
@@ -447,6 +500,8 @@ const AnswersView = new Lang.Class({
     },
 
     clear: function(animate_out=false) {
+        this._copy_code_btn.hide();
+
         if(animate_out) {
             this._animation_running = true;
             this._show_icon();

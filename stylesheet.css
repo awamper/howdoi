@@ -241,6 +241,23 @@
     color: rgba(0, 106, 255, 1);
 }
 
+.howdoi-copy-code-button {
+    padding-top: 20px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.howdoi-copy-code-button:hover {
+    color: rgba(0, 106, 255, 0.8);
+}
+
+.howdoi-copy-code-button:active {
+    color: rgba(0, 106, 255, 1);
+}
+
+.howdoi-copy-code-button:disabled {
+    color: rgba(255, 255, 255, 0.1);
+}
+
 .howdoi-answer-link-popup {
     padding: 5px;
     background-color: rgba(0, 0, 0, 0.7);
