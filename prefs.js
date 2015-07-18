@@ -25,6 +25,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const PrefsKeys = Me.imports.prefs_keys;
 const Utils = Me.imports.utils;
+const Constants = Me.imports.constants;
 
 const KeybindingsWidget = new GObject.Class({
     Name: 'Keybindings.Widget',
@@ -400,6 +401,20 @@ const HowDoIPrefsWidget = new GObject.Class({
             PrefsKeys.USE_GOOGLE_SEARCH
         );
         page.add_separator();
+
+        let modes = [];
+        for each(let mode in Constants.ANSWER_VIEW_MODE) {
+            modes.push({
+                title: Constants.ANSWER_VIEW_MODE_NAME[mode],
+                value: mode
+            });
+        }
+        let combo = page.add_combo(
+            'Answer view mode:',
+            PrefsKeys.ANSWER_VIEW_MODE,
+            modes,
+            'int'
+        );
 
         let spin_properties = {
             lower: 1,
