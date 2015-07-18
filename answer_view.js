@@ -30,6 +30,7 @@ const PrefsKeys = Me.imports.prefs_keys;
 const Answer = Me.imports.answer;
 const TextBlockEntry = Me.imports.text_block_entry;
 const Extension = Me.imports.extension;
+const Constants = Me.imports.constants;
 
 const QuestionTitle = new Lang.Class({
     Name: 'HowDoIQuestionTitle',
@@ -223,23 +224,53 @@ const AnswerView = new Lang.Class({
         for each(let b in this._copy_buttons) b.hide();
     },
 
-    set_answer: function(answer) {
-        function dump_text() {
-            if(Utils.is_blank(text_block.content)) return;
+    _count_code_blocks: function(text_blocks) {
+        let result = 0;
 
-            let label = new TextBlockEntry.TextBlockEntry(text_block);
-            box.add(label.actor, {
-                expand: false,
-                x_fill: false,
-                y_fill: false,
-                x_align: St.Align.START,
-                y_align: St.Align.START
-            });
+        for each(let block in text_blocks) {
+            if(block.type !== Answer.BLOCK_TYPE.CODE) continue;
 
-            text_block.content = '';
-            text_block.links = [];
+            let lines_count = block.content.split('\n').length;
+            if(lines_count > 1) result++;
         }
 
+        return result;
+    },
+
+    _dump_block: function(box, block) {
+        let view_mode = Utils.SETTINGS.get_int(PrefsKeys.ANSWER_VIEW_MODE);
+        let code_blocks_count = this._count_code_blocks(
+            this.answer.get_text_blocks()
+        );
+
+        if(Utils.is_blank(block.content)) return;
+        if(
+            view_mode !== Constants.ANSWER_VIEW_MODE.ALL &&
+            (
+                block.type === Answer.BLOCK_TYPE.TEXT ||
+                block.type === Answer.BLOCK_TYPE.BLOCKQUOTE
+            ) && code_blocks_count > 0
+        ) return;
+
+        let entry = new TextBlockEntry.TextBlockEntry(block);
+        box.add(entry.actor, {
+            expand: false,
+            x_fill: false,
+            y_fill: false,
+            x_align: St.Align.START,
+            y_align: St.Align.START
+        });
+
+        if(block.type === Answer.BLOCK_TYPE.CODE) {
+            this._copy_buttons.push(new CopyBlockButton(this, entry));
+        }
+
+        block.content = '';
+        block.links = [];
+    },
+
+    set_answer: function(answer) {
+        let view_mode = Utils.SETTINGS.get_int(PrefsKeys.ANSWER_VIEW_MODE);
         this._answer = answer;
 
         let box = new St.BoxLayout({
@@ -261,7 +292,13 @@ const AnswerView = new Lang.Class({
             type: Answer.BLOCK_TYPE.TEXT,
             content: ''
         };
+        let code_block = {
+            type: Answer.BLOCK_TYPE.CODE,
+            content: ''
+        };
+
         let text_blocks = answer.get_text_blocks();
+        let code_blocks_count = this._count_code_blocks(text_blocks);
 
         for each(let block in text_blocks) {
             if(block.type === Answer.BLOCK_TYPE.TEXT) {
@@ -269,7 +306,7 @@ const AnswerView = new Lang.Class({
                 let is_last = (
                     text_blocks.indexOf(block) === text_blocks.length - 1
                 );
-                if(is_last) dump_text();
+                if(is_last) this._dump_block(box, text_block);
             }
             else if(block.type === Answer.BLOCK_TYPE.CODE) {
                 let lines_count = block.content.split('\n').length;
@@ -281,7 +318,12 @@ const AnswerView = new Lang.Class({
                     );
                 }
                 else {
-                    dump_text();
+                    this._dump_block(box, text_block);
+
+                    if(view_mode === Constants.ANSWER_VIEW_MODE.ONLY_CODE) {
+                        code_block.content += block.content;
+                        continue;
+                    }
 
                     let entry = new TextBlockEntry.TextBlockEntry(block);
                     this._copy_buttons.push(new CopyBlockButton(this, entry));
@@ -292,10 +334,17 @@ const AnswerView = new Lang.Class({
                         x_align: St.Align.START,
                         y_align: St.Align.START
                     });
+
+                    if(view_mode === Constants.ANSWER_VIEW_MODE.FIRST_CODE) break;
                 }
             }
             else if(block.type === Answer.BLOCK_TYPE.BLOCKQUOTE) {
-                dump_text();
+                if(
+                    view_mode !== Constants.ANSWER_VIEW_MODE.ALL &&
+                    code_blocks_count > 0
+                ) continue;
+
+                this._dump_block(box, text_block);
 
                 let entry = new TextBlockEntry.TextBlockEntry(block);
                 box.add(entry.actor, {
@@ -308,6 +357,7 @@ const AnswerView = new Lang.Class({
             }
         }
 
+        this._dump_block(box, code_block);
         this._scroll.add_actor(box);
     },
 

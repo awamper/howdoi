@@ -71,5 +71,9 @@
         <default>true</default>
     </key>
 
+    <key type="i" name="answer-view-mode">
+        <default>2</default>
+    </key>
+
   </schema>
 </schemalist>

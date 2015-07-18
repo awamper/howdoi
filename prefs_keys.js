@@ -32,3 +32,4 @@ const MAX_ANSWERS = 'max-answers';
 const HISTORY = 'history';
 const HISTORY_LIMIT = 'history-limit';
 const QUESTION_TITLE = 'question-title';
+const ANSWER_VIEW_MODE = 'answer-view-mode';
