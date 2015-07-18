@@ -224,24 +224,9 @@ const AnswerView = new Lang.Class({
         for each(let b in this._copy_buttons) b.hide();
     },
 
-    _count_code_blocks: function(text_blocks) {
-        let result = 0;
-
-        for each(let block in text_blocks) {
-            if(block.type !== Answer.BLOCK_TYPE.CODE) continue;
-
-            let lines_count = block.content.split('\n').length;
-            if(lines_count > 1) result++;
-        }
-
-        return result;
-    },
-
     _dump_block: function(box, block) {
         let view_mode = Utils.SETTINGS.get_int(PrefsKeys.ANSWER_VIEW_MODE);
-        let code_blocks_count = this._count_code_blocks(
-            this.answer.get_text_blocks()
-        );
+        let code_blocks_count = this.answer.count_blocks(Answer.BLOCK_TYPE.CODE)
 
         if(Utils.is_blank(block.content)) return;
         if(
@@ -298,7 +283,7 @@ const AnswerView = new Lang.Class({
         };
 
         let text_blocks = answer.get_text_blocks();
-        let code_blocks_count = this._count_code_blocks(text_blocks);
+        let code_blocks_count = this.answer.count_blocks(Answer.BLOCK_TYPE.CODE)
 
         for each(let block in text_blocks) {
             if(block.type === Answer.BLOCK_TYPE.TEXT) {
