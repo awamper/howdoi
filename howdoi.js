@@ -176,6 +176,14 @@ const HowDoI = new Lang.Class({
             this._search_entry.grab_key_focus(false);
             this._search_entry.set_text(ch);
         }
+        else if(symbol === Clutter.Up) {
+            this._search_entry.history_prev();
+            this._search_entry.grab_key_focus();
+        }
+        else if(symbol === Clutter.Down) {
+            this._search_entry.history_next();
+            this._search_entry.grab_key_focus();
+        }
 
         return Clutter.EVENT_STOP;
     },

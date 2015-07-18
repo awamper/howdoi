@@ -111,31 +111,11 @@ const SearchEntry = new Lang.Class({
         }
         else if(symbol === Clutter.Up && !control && !shift) {
             if(this._entry_suggestions.shown) return Clutter.EVENT_PROPAGATE;
-            let prev = this._history.prev();
-
-            if(prev) {
-                this._entry_suggestions.ignore_change = true;
-                this.set_text(prev);
-                return Clutter.EVENT_STOP;
-            }
-            else {
-                return Clutter.EVENT_PROPAGATE;
-            }
+            return this.history_prev();
         }
         else if(symbol === Clutter.Down && !control && !shift) {
             if(this._entry_suggestions.shown) return Clutter.EVENT_PROPAGATE;
-            let next = this._history.next();
-
-            if(next) {
-                this._entry_suggestions.ignore_change = true;
-                this.set_text(next);
-                return Clutter.EVENT_STOP;
-            }
-            else {
-                this._entry_suggestions.ignore_change = true;
-                this.set_text('');
-                return Clutter.EVENT_PROPAGATE;
-            }
+            return this.history_next();
         }
 
         return Clutter.EVENT_PROPAGATE;
@@ -173,6 +153,34 @@ const SearchEntry = new Lang.Class({
         }
 
         this.actor.grab_key_focus();
+    },
+
+    history_prev: function() {
+        let prev = this._history.prev();
+
+        if(prev) {
+            this._entry_suggestions.ignore_change = true;
+            this.set_text(prev);
+            return Clutter.EVENT_STOP;
+        }
+        else {
+            return Clutter.EVENT_PROPAGATE;
+        }
+    },
+
+    history_next: function() {
+        let next = this._history.next();
+
+        if(next) {
+            this._entry_suggestions.ignore_change = true;
+            this.set_text(next);
+            return Clutter.EVENT_STOP;
+        }
+        else {
+            this._entry_suggestions.ignore_change = true;
+            this.set_text('');
+            return Clutter.EVENT_PROPAGATE;
+        }
     },
 
     destroy: function() {
