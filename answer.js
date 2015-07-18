@@ -171,5 +171,9 @@ const Answer = new Lang.Class({
 
     get markup() {
         return Utils.strip_tags(this.body, ALLOWED_TAGS);
+    },
+
+    get text_blocks() {
+        return this.get_text_blocks();
     }
 });
