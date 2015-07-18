@@ -43,6 +43,8 @@ const Answer = new Lang.Class({
         for each(let key in Object.keys(data)) {
             this[key] = data[key];
         }
+
+        this._text_blocks = [];
     },
 
     _replace_markup_tags: function(markup) {
@@ -71,6 +73,8 @@ const Answer = new Lang.Class({
     },
 
     get_text_blocks: function() {
+        if(this._text_blocks.length > 0) return this._text_blocks;
+
         let block_maps = [];
         let match;
 
@@ -157,7 +161,8 @@ const Answer = new Lang.Class({
             this._parse_links(block);
         }
 
-        return text_blocks;
+        this._text_blocks = text_blocks;
+        return this._text_blocks;
     },
 
     destroy: function() {
