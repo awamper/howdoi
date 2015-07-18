@@ -254,7 +254,7 @@ const AnswerView = new Lang.Class({
 
         let entry = new TextBlockEntry.TextBlockEntry(block);
         box.add(entry.actor, {
-            expand: false,
+            expand: true,
             x_fill: false,
             y_fill: false,
             x_align: St.Align.START,
@@ -284,7 +284,7 @@ const AnswerView = new Lang.Class({
                 y_fill: false,
                 expand: true,
                 x_align: St.Align.START,
-                y_align: St.Align.MIDDLE
+                y_align: St.Align.START
             });
         }
 
@@ -328,7 +328,7 @@ const AnswerView = new Lang.Class({
                     let entry = new TextBlockEntry.TextBlockEntry(block);
                     this._copy_buttons.push(new CopyBlockButton(this, entry));
                     box.add(entry.actor, {
-                        expand: false,
+                        expand: true,
                         x_fill: false,
                         y_fill: false,
                         x_align: St.Align.START,
@@ -348,7 +348,7 @@ const AnswerView = new Lang.Class({
 
                 let entry = new TextBlockEntry.TextBlockEntry(block);
                 box.add(entry.actor, {
-                    expand: false,
+                    expand: true,
                     x_fill: false,
                     y_fill: false,
                     x_align: St.Align.START,
