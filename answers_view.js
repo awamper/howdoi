@@ -29,6 +29,7 @@ const PrefsKeys = Me.imports.prefs_keys;
 const Answer = Me.imports.answer;
 const AnswerView = Me.imports.answer_view;
 const PageIndicators = Me.imports.page_indicators;
+const Constants = Me.imports.constants;
 
 const PAGE_SWITCH_TIME = 0.3;
 const RESULTS_ANIMATION_TIME = 0.3;
@@ -116,15 +117,28 @@ const AnswersView = new Lang.Class({
         );
         this._page_indicators.connect('notify::current-page',
             Lang.bind(this, function() {
+                if(
+                    this.active_answer.current_mode ===
+                    Constants.ANSWER_VIEW_MODE.ONLY_CODE
+                ) {
+                    this._view_mode_btn.checked = true;
+                }
+                else {
+                    this._view_mode_btn.checked = false;
+                }
+
                 let code_blocks_count = this.active_answer.answer.count_blocks(
                     Answer.BLOCK_TYPE.CODE
                 );
                 if(code_blocks_count > 0) {
                     this._copy_code_btn.show();
                     this._copy_code_btn.remove_style_pseudo_class('disabled');
+                    this._view_mode_btn.show();
+                    this._view_mode_btn.remove_style_pseudo_class('disabled');
                 }
                 else {
                     this._copy_code_btn.add_style_pseudo_class('disabled');
+                    this._view_mode_btn.add_style_pseudo_class('disabled');
                 }
 
                 if(this._page_indicators.n_pages <= 1) return;
@@ -264,7 +278,36 @@ const AnswersView = new Lang.Class({
                 }
             })
         );
-        this._table.add(this._copy_code_btn, {
+
+        let view_mode_icon = new St.Icon({
+            icon_name: 'view-paged-symbolic',
+            icon_size: 30
+        });
+        this._view_mode_btn = new St.Button({
+            child: view_mode_icon,
+            style_class: 'howdoi-view-mode-button',
+            toggle_mode: true,
+            visible: false
+        });
+        this._view_mode_btn.connect('clicked',
+            Lang.bind(this, function() {
+                if(this._view_mode_btn.has_style_pseudo_class('disabled')) {
+                    this._view_mode_btn.remove_style_pseudo_class('checked');
+                    return;
+                }
+
+                let mode = Constants.ANSWER_VIEW_MODE.ALL;
+                if(this._view_mode_btn.checked) mode = Constants.ANSWER_VIEW_MODE.ONLY_CODE;
+                this.active_answer.set_mode(mode);
+            })
+        );
+
+        let button_box = new St.BoxLayout({
+            vertical: true
+        });
+        button_box.add_child(this._copy_code_btn);
+        button_box.add_child(this._view_mode_btn);
+        this._table.add(button_box, {
             row: 0,
             col: 0,
             row_span: 2,
@@ -501,6 +544,7 @@ const AnswersView = new Lang.Class({
 
     clear: function(animate_out=false) {
         this._copy_code_btn.hide();
+        this._view_mode_btn.hide();
 
         if(animate_out) {
             this._animation_running = true;
