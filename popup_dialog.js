@@ -58,6 +58,7 @@ const PopupDialog = new Lang.Class({
         }
 
         this._shown = false;
+        this._hiding = false;
     },
 
     _reposition: function(x, y) {
@@ -137,11 +138,13 @@ const PopupDialog = new Lang.Class({
             Main.popModal(this.actor);
         }
 
+        this.hiding = false;
         this._disconnect_captured_event();
     },
 
     show: function(animation) {
-        if(this.shown) return;
+        if(this.shown && !this.hiding) return;
+        if(this.hiding) Tweener.removeTweens(this.actor);
 
         this._reposition();
 
@@ -184,6 +187,7 @@ const PopupDialog = new Lang.Class({
             animation === undefined
             ? true
             : animation;
+        this.hiding = true;
 
         if(!animation) {
             this.actor.hide();
@@ -262,6 +266,14 @@ const PopupDialog = new Lang.Class({
     set shown(shown) {
         this._shown = shown;
         this.emit('notify::shown', shown);
+    },
+
+    get hiding() {
+        return this._hiding;
+    },
+
+    set hiding(hiding) {
+        this._hiding = hiding;
     }
 });
 Signals.addSignalMethods(PopupDialog.prototype);
