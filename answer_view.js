@@ -196,6 +196,11 @@ const AnswerView = new Lang.Class({
         this._answer = null;
         this._copy_buttons = [];
 
+        this._box = new St.BoxLayout({
+            vertical: true,
+            style: 'spacing: 5px;'
+        });
+
         this._scroll = new St.ScrollView({
             style_class: 'howdoi-answer-view'
         });
@@ -203,6 +208,7 @@ const AnswerView = new Lang.Class({
             Gtk.PolicyType.NEVER,
             Gtk.PolicyType.AUTOMATIC
         );
+        this._scroll.add_actor(this._box);
         this.actor.add(this._scroll, {
             x_fill: true,
             y_fill: true,
@@ -210,6 +216,7 @@ const AnswerView = new Lang.Class({
         });
 
         this.set_answer(answer);
+        this._current_mode = null;
         this._connection_id = Extension.howdoi.connect('closing',
             Lang.bind(this, this._hide_copy_buttons)
         );
@@ -224,7 +231,7 @@ const AnswerView = new Lang.Class({
         for each(let b in this._copy_buttons) b.hide();
     },
 
-    _dump_block: function(box, block) {
+    _dump_block: function(block) {
         let view_mode = Utils.SETTINGS.get_int(PrefsKeys.ANSWER_VIEW_MODE);
         let code_blocks_count = this.answer.count_blocks(Answer.BLOCK_TYPE.CODE)
 
@@ -238,7 +245,7 @@ const AnswerView = new Lang.Class({
         ) return;
 
         let entry = new TextBlockEntry.TextBlockEntry(block);
-        box.add(entry.actor, {
+        this._box.add(entry.actor, {
             expand: true,
             x_fill: false,
             y_fill: false,
@@ -258,13 +265,9 @@ const AnswerView = new Lang.Class({
         let view_mode = Utils.SETTINGS.get_int(PrefsKeys.ANSWER_VIEW_MODE);
         this._answer = answer;
 
-        let box = new St.BoxLayout({
-            vertical: true
-        });
-
         if(Utils.SETTINGS.get_boolean(PrefsKeys.QUESTION_TITLE)) {
             let title = new QuestionTitle(this._answer);
-            box.add(title.actor, {
+            this._box.add(title.actor, {
                 x_fill: true,
                 y_fill: false,
                 expand: true,
@@ -291,7 +294,7 @@ const AnswerView = new Lang.Class({
                 let is_last = (
                     text_blocks.indexOf(block) === text_blocks.length - 1
                 );
-                if(is_last) this._dump_block(box, text_block);
+                if(is_last) this._dump_block(text_block);
             }
             else if(block.type === Answer.BLOCK_TYPE.CODE) {
                 let lines_count = block.content.split('\n').length;
@@ -303,7 +306,7 @@ const AnswerView = new Lang.Class({
                     );
                 }
                 else {
-                    this._dump_block(box, text_block);
+                    this._dump_block(text_block);
 
                     if(view_mode === Constants.ANSWER_VIEW_MODE.ONLY_CODE) {
                         code_block.content += block.content;
@@ -312,7 +315,7 @@ const AnswerView = new Lang.Class({
 
                     let entry = new TextBlockEntry.TextBlockEntry(block);
                     this._copy_buttons.push(new CopyBlockButton(this, entry));
-                    box.add(entry.actor, {
+                    this._box.add(entry.actor, {
                         expand: true,
                         x_fill: false,
                         y_fill: false,
@@ -329,10 +332,10 @@ const AnswerView = new Lang.Class({
                     code_blocks_count > 0
                 ) continue;
 
-                this._dump_block(box, text_block);
+                this._dump_block(text_block);
 
                 let entry = new TextBlockEntry.TextBlockEntry(block);
-                box.add(entry.actor, {
+                this._box.add(entry.actor, {
                     expand: true,
                     x_fill: false,
                     y_fill: false,
@@ -342,8 +345,7 @@ const AnswerView = new Lang.Class({
             }
         }
 
-        this._dump_block(box, code_block);
-        this._scroll.add_actor(box);
+        this._dump_block(code_block);
     },
 
     set_width: function(width) {
@@ -373,6 +375,38 @@ const AnswerView = new Lang.Class({
         }
     },
 
+    set_mode: function(view_mode=null) {
+        if(view_mode === null) {
+            view_mode = Utils.SETTINGS.get_int(PrefsKeys.ANSWER_VIEW_MODE);
+        }
+
+        this._current_mode = view_mode;
+        let code_shown = false;
+
+        for each(let child in this._box.get_children()) {
+            if(!child.text_block) continue;
+
+            if(view_mode === Constants.ANSWER_VIEW_MODE.ALL) {
+                child.show();
+            }
+            else if(view_mode === Constants.ANSWER_VIEW_MODE.FIRST_CODE) {
+                if(child.text_block.type !== Answer.BLOCK_TYPE.CODE) child.hide();
+
+                if(!code_shown) {
+                    child.show();
+                    code_shown = true;
+                }
+                else {
+                    child.hide();
+                }
+            }
+            else if(view_mode === Constants.ANSWER_VIEW_MODE.ONLY_CODE) {
+                if(child.text_block.type === Answer.BLOCK_TYPE.CODE) child.show();
+                else child.hide();
+            }
+        }
+    },
+
     destroy: function() {
         Extension.howdoi.disconnect(this._connection_id);
         this._connection_id = 0;
@@ -387,5 +421,9 @@ const AnswerView = new Lang.Class({
 
     get scroll() {
         return this._scroll;
+    },
+
+    get current_mode() {
+        return this._current_mode;
     }
 });

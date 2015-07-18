@@ -88,6 +88,7 @@ const TextBlockEntry = new Lang.Class({
         this.actor.connect('destroy',
             Lang.bind(this, this._destroy)
         );
+        this.actor.text_block = text_block;
 
         this._entry = new St.Entry({
             style_class: 'howdoi-answer-view-entry',
@@ -286,6 +287,7 @@ const TextBlockEntry = new Lang.Class({
     _destroy: function() {
         this._link_entered = null;
         this._link_maps = [];
+        this.actor.text_block = null;
 
         this._remove_timeout();
         this._link_popup.destroy();
