@@ -240,3 +240,9 @@
 .howdoi-copy-block-button:active {
     color: rgba(0, 106, 255, 1);
 }
+
+.howdoi-answer-link-popup {
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+}

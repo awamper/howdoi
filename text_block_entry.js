@@ -19,9 +19,13 @@ const St = imports.gi.St;
 const Lang = imports.lang;
 const Mainloop = imports.mainloop;
 const GLib = imports.gi.GLib;
+const Gio = imports.gi.Gio;
 const Clutter = imports.gi.Clutter;
 const Pango = imports.gi.Pango;
+const Meta = imports.gi.Meta;
+const Signals = imports.signals;
 const Tweener = imports.ui.tweener;
+const Params = imports.misc.params;
 const Main = imports.ui.main;
 const ExtensionUtils = imports.misc.extensionUtils;
 
@@ -29,16 +33,55 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const Answer = Me.imports.answer;
 const PopupDialog = Me.imports.popup_dialog;
+const Extension = Me.imports.extension;
 
 const COPY_SELECTION_TIMEOUT_MS = 400;
 const TIMEOUT_IDS = {
     SELECTION: 0
 };
 
+const LINKS_REGEXP = /\[a href="(.*?)"\](.*?)\[\/a\]/gi;
+
+const LinkPopup = new Lang.Class({
+    Name: 'HowDoIAnswerLinkPopup',
+    Extends: PopupDialog.PopupDialog,
+
+    _init: function() {
+        this.parent({
+            modal: false,
+            style_class: 'howdoi-answer-link-popup'
+        });
+
+        this._label = new St.Label();
+        this.actor.add_child(this._label);
+    },
+
+    _reposition: function() {
+        this.parent();
+        this.actor.y = this.actor.y + 15;
+    },
+
+    _show_done: function() {
+        this.parent();
+        this._reposition();
+    },
+
+    reposition: function() {
+        this._reposition();
+    },
+
+    set: function(link) {
+        if(link !== null) this._label.set_text(link.url);
+    }
+});
+
 const TextBlockEntry = new Lang.Class({
     Name: 'HowDoIAnswerTextBlockEntry',
 
-    _init: function(text_block) {
+    _init: function(text_block, params) {
+        this.params = Params.parse(params, {
+            track_links_hover: true
+        });
         this.actor = new St.BoxLayout({
             vertical: false
         });
@@ -47,27 +90,25 @@ const TextBlockEntry = new Lang.Class({
         );
 
         this._entry = new St.Entry({
-            style_class: 'howdoi-answer-view-entry'
+            style_class: 'howdoi-answer-view-entry',
+            reactive: true
         });
-        this._entry.connect('enter-event',
-            Lang.bind(this, function() {
-                this._clutter_text.set_selectable(true);
-                this._clutter_text.set_editable(true);
-            })
-        );
         this._entry.connect('leave-event',
             Lang.bind(this, function() {
                 if(!Utils.is_pointer_inside_actor(this._copy_button)) {
-                    this._clutter_text.set_selectable(false);
                     this._clutter_text.set_editable(false);
+                    this._link_popup.hide();
                     this._hide_button();
                 }
             })
         );
+        this._entry.connect('motion-event',
+            Lang.bind(this, this._on_motion_event)
+        );
         this.actor.add_child(this._entry);
 
         this._clutter_text = this._entry.get_clutter_text();
-        this._clutter_text.set_selectable(false);
+        this._clutter_text.set_selectable(true);
         this._clutter_text.set_editable(false);
         this._clutter_text.set_single_line_mode(false);
         this._clutter_text.set_activatable(false);
@@ -76,11 +117,24 @@ const TextBlockEntry = new Lang.Class({
         this._clutter_text.set_line_wrap_mode(
             Pango.WrapMode.WORD_CHAR
         );
+        this._clutter_text.set_ellipsize(
+            Pango.EllipsizeMode.NONE
+        );
         this._clutter_text.connect('cursor-changed',
             Lang.bind(this, this._on_cursor_changed)
         );
         this._clutter_text.connect('key-focus-out',
             Lang.bind(this, this._hide_button)
+        );
+        this._clutter_text.connect('button-press-event',
+            Lang.bind(this, function() {
+                if(this._link_entered) return Clutter.EVENT_PROPAGATE;
+                this._clutter_text.set_editable(true);
+                return Clutter.EVENT_PROPAGATE;
+            })
+        );
+        this._clutter_text.connect('button-release-event',
+            Lang.bind(this, this._on_text_button_release_event)
         );
 
         this._copy_label = new St.Label();
@@ -102,6 +156,34 @@ const TextBlockEntry = new Lang.Class({
             })
         );
         Main.uiGroup.add_child(this._copy_button);
+
+        this._link_popup = new LinkPopup();
+        this._link_entered = null;
+        this._link_maps = [];
+
+        this.connect('link-clicked',
+            Lang.bind(this, function(sender, link) {
+                this._link_popup.hide();
+                if(Utils.is_blank(link.url)) return;
+                Gio.app_info_launch_default_for_uri(
+                    link.url,
+                    Utils.make_launch_context()
+                );
+                Extension.howdoi.hide();
+            })
+        );
+        this.connect('link-enter',
+            Lang.bind(this, function(sender, link) {
+                this._link_popup.set(link);
+                this._link_popup.show();
+            })
+        );
+        this.connect('link-leave',
+            Lang.bind(this, function(sender) {
+                this._link_popup.set(null);
+                this._link_popup.hide();
+            })
+        );
 
         this.set(text_block);
     },
@@ -202,9 +284,114 @@ const TextBlockEntry = new Lang.Class({
     },
 
     _destroy: function() {
+        this._link_entered = null;
+        this._link_maps = [];
+
         this._remove_timeout();
+        this._link_popup.destroy();
         this._copy_button.destroy();
         this.actor.destroy();
+    },
+
+    _find_link_at_coords: function(event) {
+        if(this._link_maps.length < 1) return -1;
+
+        let result = -1;
+        let [x, y] = event.get_coords();
+        [success, x, y] = this._entry.transform_stage_point(x, y);
+        if(!success) return result;
+
+        for each(let link in this._link_maps) {
+            let [success, url_start_x, url_start_y, line_height] =
+                this._clutter_text.position_to_coords(link.start);
+            let [end_success, url_end_x, url_end_y, end_line_height] =
+                this._clutter_text.position_to_coords(link.stop);
+
+            if(
+                url_start_y > y
+                || url_start_y + line_height < y
+                || x < url_start_x
+                || x > url_end_x
+            ) {
+                continue;
+            }
+            else {
+                result = link;
+                break;
+            }
+        }
+
+        return result;
+    },
+
+    _on_motion_event: function(o, event) {
+        let link = this._find_link_at_coords(event);
+
+        if(link !== -1) {
+            if(this._link_popup.shown) this._link_popup.reposition();
+            global.screen.set_cursor(Meta.Cursor.POINTING_HAND);
+            if(!this.params.track_links_hover) return Clutter.EVENT_PROPAGATE;
+
+            if(this._link_entered === null) {
+                this._link_entered = link;
+                this.emit('link-enter', link);
+            }
+            else if(this._link_entered !== null && this._link_entered !== link) {
+                this._link_entered = link;
+                this.emit('link-leave');
+                this.emit('link-enter', link);
+            }
+
+            return Clutter.EVENT_PROPAGATE;
+        }
+        else {
+            global.screen.set_cursor(Meta.Cursor.DEFAULT);
+            if(!this.params.track_links_hover) return Clutter.EVENT_PROPAGATE;
+
+            if(this._link_entered) {
+                this._link_entered = null;
+                this.emit('link-leave');
+            }
+
+            return Clutter.EVENT_PROPAGATE;
+        }
+    },
+
+    _on_text_button_release_event: function(o, event) {
+        let button = event.get_button();
+        if(button !== Clutter.BUTTON_PRIMARY) return Clutter.EVENT_PROPAGATE;
+        let link = this._find_link_at_coords(event)
+        if(link !== -1) this.emit('link-clicked', link);
+        return Clutter.EVENT_PROPAGATE;
+    },
+
+    _parse_links: function(markup) {
+        let link_maps = [];
+        let match;
+        let new_content = markup;
+        let start_offset = 0;
+
+        while((match = LINKS_REGEXP.exec(markup)) !== null) {
+            let url = match[1].trim();
+            let title = match[2];
+            let link_markup =
+                '<span foreground="#006AFF"><u>%s</u></span>'.format(title);
+
+            let markup_offset = match.index - Utils.strip_tags(
+                markup.slice(0, match.index)
+            ).length;
+            new_content = new_content.replace(match[0], link_markup);
+            let map = {
+                title: title,
+                url: url,
+                start: match.index - start_offset - markup_offset,
+                stop: match.index + title.length - start_offset - markup_offset
+            };
+            start_offset += match[0].length - title.length;
+            link_maps.push(map);
+        }
+
+        return [link_maps, new_content];
     },
 
     set: function(text_block) {
@@ -227,6 +414,8 @@ const TextBlockEntry = new Lang.Class({
             // nothing
         }
 
+        [this._link_maps, markup] = this._parse_links(markup);
+
         if(!Utils.is_blank(color_bin.style)) {
             this.actor.insert_child_below(color_bin, this._entry)
         }
@@ -242,3 +431,4 @@ const TextBlockEntry = new Lang.Class({
         return this._entry.get_text();
     }
 });
+Signals.addSignalMethods(TextBlockEntry.prototype);
