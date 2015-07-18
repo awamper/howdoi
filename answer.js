@@ -72,6 +72,25 @@ const Answer = new Lang.Class({
         block.content = new_content;
     },
 
+    count_blocks: function(type=null) {
+        let result = 0;
+
+        for each(let block in this.text_blocks) {
+            if(type === null) {
+                result++;
+            }
+            else if(block.type === type && type === BLOCK_TYPE.CODE) {
+                let lines_count = block.content.split('\n').length;
+                if(lines_count > 1) result++;
+            }
+            else if(block.type === type) {
+                result++;
+            }
+        }
+
+        return result;
+    },
+
     get_text_blocks: function() {
         if(this._text_blocks.length > 0) return this._text_blocks;
 
