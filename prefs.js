@@ -26,6 +26,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 const PrefsKeys = Me.imports.prefs_keys;
 const Utils = Me.imports.utils;
 const Constants = Me.imports.constants;
+const StackExchangeSites = Me.imports.stackexchange_sites;
 
 const KeybindingsWidget = new GObject.Class({
     Name: 'Keybindings.Widget',
@@ -385,6 +386,22 @@ const HowDoIPrefsWidget = new GObject.Class({
     _get_main_page: function() {
         let name = 'Main';
         let page = new PrefsGrid(Utils.SETTINGS);
+
+        let sites = [];
+        for (let i = 0; i < StackExchangeSites.LIST.length; i++) {
+            sites.push({
+                title: StackExchangeSites.LIST[i].name,
+                value: i
+            });
+        }
+        page.add_combo(
+            'Default site:',
+            PrefsKeys.DEFAULT_SITE_ID,
+            sites,
+            'int'
+        );
+
+        page.add_separator();
 
         page.add_boolean(
             'Suggestions:',

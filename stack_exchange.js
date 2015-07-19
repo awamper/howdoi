@@ -21,6 +21,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
+const StackExchangeSites = Me.imports.stackexchange_sites;
 
 const ANSWERS_FILTER = '!Fcazzsr2b3LgpofBVp)I3LvQBX';
 const SEARCH_FILTER = '!)5IW-5Quf3(QZ8(H(ZGO3m1FuusY';
@@ -174,6 +175,10 @@ const StackExchange = new Lang.Class({
                 }
             })
         );
+    },
+
+    get_site: function(index) {
+        return StackExchangeSites.LIST[index] || false;
     },
 
     destroy: function() {

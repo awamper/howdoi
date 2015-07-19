@@ -91,11 +91,12 @@ const AnswersProvider = new Lang.Class({
         if(limit === undefined) limit = this._limit;
 
         if(this.site === null) {
-            let default_site = Utils.SETTINGS.get_string(
-                PrefsKeys.DEFAULT_SITE
+            let default_site_id = Utils.SETTINGS.get_int(
+                PrefsKeys.DEFAULT_SITE_ID
             );
-            this._google_search.site = default_site;
-            this._stackexchange.site = default_site;
+            let default_site = this._stackexchange.get_site(default_site_id);
+            this._google_search.site = default_site.site_url;
+            this._stackexchange.site = default_site.api_site_parameter;
         }
 
         this._get_question_ids(query, limit,
