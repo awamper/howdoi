@@ -32,6 +32,8 @@ const SearchEntry = Me.imports.search_entry;
 const AnswersView = Me.imports.answers_view;
 const AnswersProvider = Me.imports.answers_provider;
 const ProgressBar = Me.imports.progress_bar;
+const StackExchangeSites = Me.imports.stackexchange_sites;
+const SiteLogo = Me.imports.site_logo;
 
 const CONNECTION_IDS = {
     CAPTURED_EVENT: 0
@@ -124,6 +126,15 @@ const HowDoI = new Lang.Class({
             style_class: 'howdoi-background'
         });
 
+        this._site_logo = new SiteLogo.SiteLogo();
+        this._background_actor.add(this._site_logo.actor, {
+            expand: true,
+            x_fill: false,
+            y_fill: false,
+            x_align: St.Align.START,
+            y_align: St.Align.END
+        });
+
         let preferences_icon = new St.Icon({
             icon_name: 'preferences-system-symbolic',
             style_class: 'howdoi-control-button',
@@ -136,7 +147,6 @@ const HowDoI = new Lang.Class({
                 this.hide();
             })
         );
-
         this._background_actor.add(preferences_icon, {
             expand: true,
             x_fill: false,
@@ -146,6 +156,22 @@ const HowDoI = new Lang.Class({
         });
 
         this._shown = false;
+
+        Utils.SETTINGS.connect(
+            'changed::' + PrefsKeys.DEFAULT_SITE_ID,
+            Lang.bind(this, function() {
+                let site_info = StackExchangeSites.LIST[
+                    Utils.SETTINGS.get_int(PrefsKeys.DEFAULT_SITE_ID)
+                ];
+                if(!site_info) return;
+                this.set_site(site_info);
+            })
+        );
+
+        let current_site_id = Utils.SETTINGS.get_int(
+            PrefsKeys.DEFAULT_SITE_ID
+        );
+        this.set_site(StackExchangeSites.LIST[current_site_id]);
     },
 
     _on_key_press_event: function(sender, event) {
@@ -418,6 +444,11 @@ const HowDoI = new Lang.Class({
         });
     },
 
+    set_site: function(site_info) {
+        this._answers_provider.site = site_info;
+        this._site_logo.set_site(this._answers_provider.site);
+    },
+
     hide: function(animation) {
         if(!this.shown) return;
 
@@ -490,6 +521,7 @@ const HowDoI = new Lang.Class({
     destroy: function() {
         Utils.HTTP_CACHE.dump();
         this._disconnect_captured_event();
+        this._site_logo.destroy();
         this._progress_bar.destroy();
         this._background_actor.destroy();
         this._answers_provider.destroy();

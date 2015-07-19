@@ -267,3 +267,12 @@
     background-color: rgba(0, 0, 0, 0.7);
     color: white;
 }
+
+.howdoi-site-logo-box {
+    padding: 5px;
+}
+
+.howdoi-site-logo-label {
+    color: white;
+    font-size: 15px;
+}
