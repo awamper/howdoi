@@ -74,5 +74,9 @@
     <key type="i" name="answer-view-mode">
         <default>2</default>
     </key>
+
+    <key type="s" name="keywords">
+        <default>'{}'</default>
+    </key>
   </schema>
 </schemalist>

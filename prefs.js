@@ -150,6 +150,152 @@ const KeybindingsWidget = new GObject.Class({
     }
 });
 
+const KeywordsWidget = new GObject.Class({
+    Name: 'Keywords.Widget',
+    GTypeName: 'KeywordsWidget',
+    Extends: Gtk.Box,
+
+    _init: function(sites_list, settings_key) {
+        this.parent();
+        this.set_orientation(Gtk.Orientation.VERTICAL);
+
+        this._sites_list = sites_list;
+        this._settings_key = settings_key;
+        this._keywords = JSON.parse(
+            Utils.SETTINGS.get_string(settings_key)
+        );
+
+        let scrolled_window = new Gtk.ScrolledWindow();
+        scrolled_window.set_policy(
+            Gtk.PolicyType.AUTOMATIC,
+            Gtk.PolicyType.AUTOMATIC
+        );
+
+        this._columns = {
+            name: 0,
+            keyword: 1
+        };
+
+        this._store = new Gtk.ListStore();
+        this._store.set_column_types([
+            GObject.TYPE_STRING,
+            GObject.TYPE_STRING
+        ]);
+
+        this._tree_view = new Gtk.TreeView({
+            model: this._store,
+            hexpand: true,
+            vexpand: true
+        });
+        this._tree_view.get_selection().set_mode(Gtk.SelectionMode.SINGLE);
+
+        let name_renderer = new Gtk.CellRendererText();
+        let name_column = new Gtk.TreeViewColumn({
+            title: 'Site name',
+            expand: true
+        });
+        name_column.pack_start(name_renderer, true);
+        name_column.add_attribute(name_renderer, 'text', this._columns.name);
+        this._tree_view.append_column(name_column);
+
+        let keyword_renderer = new Gtk.CellRendererText({
+            editable: true,
+            placeholder_text: 'No keyword'
+        });
+        keyword_renderer.connect('edited',
+            Lang.bind(this, function(renderer, path, new_keyword) {
+                let [success, iterator ] =
+                    this._store.get_iter_from_string(path);
+                if(!success) {
+                    this._show_message(
+                        'Can\'t change keyword.',
+                        Gtk.MessageType.ERROR
+                    );
+                    return;
+                }
+
+                new_keyword = new_keyword.trim();
+                if(Utils.is_blank(new_keyword)) {
+                    this._show_message(
+                        'Keyword can\'t be empty.',
+                        Gtk.MessageType.ERROR
+                    );
+                    return;
+                }
+                if(this.has_keyword(new_keyword)) {
+                    this._show_message(
+                        'Keyword already exist.',
+                        Gtk.MessageType.ERROR
+                    );
+                    return;
+                }
+
+                let site_name = this._store.get_value(iterator, 0);
+                this._store.set(
+                    iterator,
+                    [this._columns.name, this._columns.keyword],
+                    [site_name, new_keyword]
+                );
+                this._save_keyword(site_name, new_keyword);
+            })
+        );
+
+        let keyword_column = new Gtk.TreeViewColumn({
+            title: 'Keyword'
+        });
+        keyword_column.pack_end(keyword_renderer, false);
+        keyword_column.add_attribute(keyword_renderer, 'text', this._columns.keyword);
+        this._tree_view.append_column(keyword_column);
+
+        scrolled_window.add(this._tree_view);
+        this.add(scrolled_window);
+
+        this._refresh();
+    },
+
+    _refresh: function() {
+        this._store.clear();
+
+        for each(let site in this._sites_list) {
+            let iter = this._store.append();
+            this._store.set(iter,
+                [this._columns.name, this._columns.keyword],
+                [site.name, this._keywords[site.name] || '']
+            );
+        }
+    },
+
+    _show_message: function(text, type) {
+        printerr(type);
+        let dialog = new Gtk.MessageDialog({
+            parent: this,
+            message_type: type,
+            buttons: Gtk.ButtonsType.OK,
+            text: text
+        });
+        dialog.run();
+        dialog.destroy();
+    },
+
+    _save_keyword: function(site_name, keyword) {
+        this._keywords[site_name] = keyword;
+        Utils.SETTINGS.set_string(
+            this._settings_key,
+            JSON.stringify(this._keywords)
+        );
+    },
+
+    has_keyword: function(keyword) {
+        for(let site_name in this._keywords) {
+            if(this._keywords[site_name] === keyword) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+});
+
 const PrefsGrid = new GObject.Class({
     Name: 'Prefs.Grid',
     GTypeName: 'PrefsGrid',
@@ -354,6 +500,7 @@ const HowDoIPrefsWidget = new GObject.Class({
 
         let main = this._get_main_page();
         let size = this._get_size_page();
+        let keywords = this._get_keywords_page();
         let keybindings = this._get_keybindings_page();
 
         let stack = new Gtk.Stack({
@@ -370,6 +517,7 @@ const HowDoIPrefsWidget = new GObject.Class({
 
         stack.add_titled(main.page, main.name, main.name);
         stack.add_titled(size.page, size.name, size.name);
+        stack.add_titled(keywords.page, keywords.name, keywords.name);
         stack.add_titled(keybindings.page, keybindings.name, keybindings.name);
 
         this.add(stack);
@@ -480,6 +628,22 @@ const HowDoIPrefsWidget = new GObject.Class({
             PrefsKeys.DIALOG_HEIGHT_PERCENTS,
             range_properties
         )
+
+        return {
+            page: page,
+            name: name
+        };
+    },
+
+    _get_keywords_page: function() {
+        let name = 'Keywords';
+        let page = new PrefsGrid(Utils.SETTINGS);
+
+        let keywords_widget = new KeywordsWidget(
+            StackExchangeSites.LIST,
+            PrefsKeys.KEYWORDS
+        );
+        page.add_item(keywords_widget)
 
         return {
             page: page,
