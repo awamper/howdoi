@@ -133,12 +133,12 @@ const AnswersProvider = new Lang.Class({
         this._google_search.destroy();
     },
 
-    set site(site) {
-        this._site = site;
+    set site(site_info) {
+        this._site = site_info;
 
         if(this._site !== null) {
-            this._stackexchange.site = this._site;
-            this._google_search.site = this._site;
+            this._stackexchange.site = this._site.api_site_parameter;
+            this._google_search.site = this._site.site_url;
         }
     },
 
