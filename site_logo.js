@@ -20,7 +20,6 @@ const Lang = imports.lang;
 const Clutter = imports.gi.Clutter;
 const Gio = imports.gi.Gio;
 const Meta = imports.gi.Meta;
-const Signals = imports.signals;
 const Tweener = imports.ui.tweener;
 const ExtensionUtils = imports.misc.extensionUtils;
 
@@ -161,4 +160,3 @@ const SiteLogo = new Lang.Class({
         this.actor.destroy();
     }
 });
-Signals.addSignalMethods(SiteLogo.prototype);
