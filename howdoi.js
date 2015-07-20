@@ -254,10 +254,17 @@ const HowDoI = new Lang.Class({
     },
 
     _resize: function() {
+        let monitor = Main.layoutManager.currentMonitor;
+        let is_primary = monitor.index === Main.layoutManager.primaryIndex;
+
+        let available_width = monitor.width;
+        let available_height = monitor.height;
+        if(is_primary) available_height -= Main.panel.actor.height;
+
         let width_percents = Utils.SETTINGS.get_int(PrefsKeys.DIALOG_WIDTH_PERCENTS);
-        let width = Math.round(Main.uiGroup.width / 100 * width_percents);
+        let width = Math.round(available_width / 100 * width_percents);
         let height_pecents = Utils.SETTINGS.get_int(PrefsKeys.DIALOG_HEIGHT_PERCENTS);
-        let height = Math.round(Main.uiGroup.height / 100 * height_pecents);
+        let height = Math.round(available_height / 100 * height_pecents);
 
         let padding = (
             this.actor.get_theme_node().get_padding(St.Side.LEFT) +
@@ -275,8 +282,15 @@ const HowDoI = new Lang.Class({
     },
 
     _reposition: function() {
-        this.actor.x = Math.round(Main.uiGroup.width / 2 - this.actor.width / 2);
-        this.actor.y = Math.round(Main.uiGroup.height / 2 - this.actor.height / 2);
+        let monitor = Main.layoutManager.currentMonitor;
+        let is_primary = monitor.index === Main.layoutManager.primaryIndex;
+
+        let available_width = monitor.width;
+        let available_height = monitor.height;
+        if(is_primary) available_height -= Main.panel.actor.height;
+
+        this.actor.x = Math.round(available_width / 2 - this.actor.width / 2);
+        this.actor.y = Math.round(available_height / 2 - this.actor.height / 2);
     },
 
     _connect_captured_event: function() {
