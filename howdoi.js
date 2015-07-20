@@ -524,7 +524,7 @@ const HowDoI = new Lang.Class({
     set_site: function(site_info) {
         this._answers_provider.site = site_info;
         this._current_site = site_info;
-	this._site_logo.set_site(site_info);
+        this._site_logo.set_site(site_info);
     },
 
     reset_site: function() {
