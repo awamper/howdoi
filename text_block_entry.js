@@ -32,7 +32,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const Answer = Me.imports.answer;
-const PopupDialog = Me.imports.popup_dialog;
+const Tooltip = Me.imports.tooltip;
 const Extension = Me.imports.extension;
 
 const COPY_SELECTION_TIMEOUT_MS = 400;
@@ -44,31 +44,7 @@ const LINKS_REGEXP = /\[a href="(.*?)"\](.*?)\[\/a\]/gi;
 
 const LinkPopup = new Lang.Class({
     Name: 'HowDoIAnswerLinkPopup',
-    Extends: PopupDialog.PopupDialog,
-
-    _init: function() {
-        this.parent({
-            modal: false,
-            style_class: 'howdoi-answer-link-popup'
-        });
-
-        this._label = new St.Label();
-        this.actor.add_child(this._label);
-    },
-
-    _reposition: function() {
-        this.parent();
-        this.actor.y = this.actor.y + 15;
-    },
-
-    _show_done: function() {
-        this.parent();
-        this._reposition();
-    },
-
-    reposition: function() {
-        this._reposition();
-    },
+    Extends: Tooltip.Tooltip,
 
     set: function(link) {
         if(link !== null) this._label.set_text(link.url);
