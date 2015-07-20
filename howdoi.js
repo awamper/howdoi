@@ -62,14 +62,16 @@ const HowDoI = new Lang.Class({
         this._search_entry.connect(
             'activate',
             Lang.bind(this, function(search_entry) {
-                this._search(search_entry.text);
+                let query = search_entry.text;
+                if(this._current_keyword !== null) {
+                    query = query.slice(this._current_keyword.length);
+                }
+                this._search(query);
             })
         );
         this._search_entry.clutter_text.connect(
             'text-changed',
-            Lang.bind(this, function() {
-                this._answers_view.clear(true);
-            })
+            Lang.bind(this, this._on_entry_text_changed)
         );
         this._search_entry.clutter_text.connect(
             'key-press-event',
@@ -146,7 +148,20 @@ const HowDoI = new Lang.Class({
         });
 
         this._shown = false;
+        this._keywords = JSON.parse(Utils.SETTINGS.get_string(
+            PrefsKeys.KEYWORDS
+        ));
+        this._current_site = null;
+        this._current_keyword = null;
 
+        Utils.SETTINGS.connect(
+            'changed::' + PrefsKeys.KEYWORDS,
+            Lang.bind(this, function() {
+                this._keywords = JSON.parse(Utils.SETTINGS.get_string(
+                    PrefsKeys.KEYWORDS
+                ));
+            })
+        );
         Utils.SETTINGS.connect(
             'changed::' + PrefsKeys.DEFAULT_SITE_ID,
             Lang.bind(this, function() {
@@ -228,6 +243,60 @@ const HowDoI = new Lang.Class({
         }
 
         return Clutter.EVENT_PROPAGATE;
+    },
+
+    _on_entry_text_changed: function() {
+        this._answers_view.clear(true);
+
+        if(Utils.is_blank(this._search_entry.text)) {
+            this.reset_site();
+            return Clutter.EVENT_PROPAGATE;
+        }
+
+        let space_index = this._search_entry.text.indexOf(' ');
+        if(space_index === -1) {
+            this.reset_site();
+            return Clutter.EVENT_PROPAGATE;
+        }
+
+        let keyword = this._search_entry.text.slice(0, space_index);
+        keyword = keyword.trim();
+
+        let site_name = this._get_name_for_keyword(keyword);
+        if(site_name === -1) {
+            this.reset_site();
+            return Clutter.EVENT_PROPAGATE;
+        }
+
+        if(this._current_site.name !== site_name) {
+            this.set_site(this._get_site_by_name(site_name));
+            this._current_keyword = keyword;
+        }
+
+        return Clutter.EVENT_PROPAGATE;
+    },
+
+    _get_name_for_keyword: function(keyword) {
+        let result = -1;
+
+        for (let site_name in this._keywords) {
+            if(this._keywords[site_name] === keyword) {
+                result = site_name;
+                break;
+            }
+        }
+
+        return result;
+    },
+
+    _get_site_by_name: function(name) {
+        let result = -1;
+
+        for each(let site in StackExchangeSites.LIST) {
+            if(site.name === name) result = site;
+        }
+
+        return result;
     },
 
     _search: function(query) {
@@ -444,6 +513,17 @@ const HowDoI = new Lang.Class({
 
     set_site: function(site_info) {
         this._answers_provider.site = site_info;
+        this._current_site = site_info;
+    },
+
+    reset_site: function() {
+        let default_site = StackExchangeSites.LIST[
+            Utils.SETTINGS.get_int(PrefsKeys.DEFAULT_SITE_ID)
+        ];
+        if(this._current_site.name !== default_site.name) {
+            this.set_site(default_site);
+            this._current_keyword = null;
+        }
     },
 
     hide: function(animation) {
