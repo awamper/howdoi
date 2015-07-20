@@ -263,14 +263,11 @@ const HowDoI = new Lang.Class({
             return Clutter.EVENT_PROPAGATE;
         }
 
-        let space_index = this._search_entry.text.indexOf(' ');
-        if(space_index === -1) {
+        let keyword = this.get_keyword_for_query(this._search_entry.text);
+        if(!keyword) {
             this.reset_site();
             return Clutter.EVENT_PROPAGATE;
         }
-
-        let keyword = this._search_entry.text.slice(0, space_index);
-        keyword = keyword.trim();
 
         let site_name = this._get_name_for_keyword(keyword);
         if(site_name === -1) {
@@ -450,6 +447,21 @@ const HowDoI = new Lang.Class({
         this.shown = false;
         if(Main._findModal(this.actor) !== -1) Main.popModal(this.actor);
         this._disconnect_captured_event();
+    },
+
+    get_keyword_for_query: function() {
+        let result = false;
+        let space_index = this._search_entry.text.indexOf(' ');
+
+        if(space_index === -1) return result;
+
+        let keyword = this._search_entry.text.slice(0, space_index);
+        keyword = keyword.trim();
+
+        let site_name = this._get_name_for_keyword(keyword);
+        if(site_name !== -1) result = keyword;
+
+        return result;
     },
 
     show: function(animation) {

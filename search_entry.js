@@ -26,6 +26,7 @@ const Utils = Me.imports.utils;
 const PrefsKeys = Me.imports.prefs_keys;
 const EntrySuggestions = Me.imports.entry_suggestions;
 const HistoryManager = Me.imports.history_manager;
+const Extension = Me.imports.extension;
 
 const SearchEntry = new Lang.Class({
     Name: 'HowDoISeachEntry',
@@ -82,8 +83,14 @@ const SearchEntry = new Lang.Class({
     },
 
     _on_text_changed: function() {
-        if(this.is_empty()) this._secondary_icon.hide();
-        else this._secondary_icon.show();
+        if(this.is_empty()) {
+            this._secondary_icon.hide();
+            this.query = '';
+        }
+        else {
+            this._secondary_icon.show();
+            this.query = this.actor.get_text();
+        }
 
         if(this.is_empty()) this._history.reset();
 
@@ -192,6 +199,18 @@ const SearchEntry = new Lang.Class({
 
     get text() {
         return !this.is_empty() ? this.actor.get_text() : '';
+    },
+
+    set query(text) {
+        if(Utils.is_blank(text)) this.actor.query = '';
+        let query = text;
+        let keyword = Extension.howdoi.get_keyword_for_query(query);
+        if(keyword) query = query.slice(keyword.length);
+        this.actor.query = query;
+    },
+
+    get query() {
+        return this.actor.query;
     },
 
     get clutter_text() {
