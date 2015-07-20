@@ -31,25 +31,38 @@ const Answer = Me.imports.answer;
 const TextBlockEntry = Me.imports.text_block_entry;
 const Extension = Me.imports.extension;
 const Constants = Me.imports.constants;
+const Tooltip = Me.imports.tooltip;
 
 const QuestionTitle = new Lang.Class({
     Name: 'HowDoIQuestionTitle',
 
     _init: function(answer) {
         this.actor = new St.BoxLayout();
+        this.actor.connect('destroy',
+            Lang.bind(this, this._destroy)
+        );
 
         this._label = new St.Label({
             style_class: 'howdoi-answer-view-title',
             reactive: true
         });
+        this._tooltip = new Tooltip.Tooltip();
+
         this._label.connect('enter-event',
             Lang.bind(this, function() {
                 global.screen.set_cursor(Meta.Cursor.POINTING_HAND);
+                this._tooltip.show();
             })
         );
         this._label.connect('leave-event',
             Lang.bind(this, function() {
                 global.screen.set_cursor(Meta.Cursor.DEFAULT);
+                this._tooltip.hide();
+            })
+        );
+        this._label.connect('motion-event',
+            Lang.bind(this, function() {
+                this._tooltip.reposition();
             })
         );
         this._label.connect('button-release-event',
@@ -72,8 +85,13 @@ const QuestionTitle = new Lang.Class({
         this.set_title(answer.title);
     },
 
+    _destroy: function() {
+        this._tooltip.destroy();
+    },
+
     set_title: function(title) {
         this._label.set_text('Q: ' + title);
+        this._tooltip.set(title);
     }
 });
 
