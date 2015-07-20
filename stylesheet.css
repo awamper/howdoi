@@ -272,7 +272,12 @@
     padding: 5px;
 }
 
-.howdoi-site-logo-label {
+.howdoi-site-logo-name {
+    color: #006AFF;
+    font-size: 30px;
+}
+
+.howdoi-site-logo-audience {
     color: white;
     font-size: 15px;
 }

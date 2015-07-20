@@ -19,6 +19,7 @@ const St = imports.gi.St;
 const Lang = imports.lang;
 const Clutter = imports.gi.Clutter;
 const Gio = imports.gi.Gio;
+const Gtk = imports.gi.Gtk;
 const Meta = imports.gi.Meta;
 const Tweener = imports.ui.tweener;
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -29,9 +30,12 @@ const Extension = Me.imports.extension;
 
 const ENTER_ANIMATION_TIME = 0.8;
 const LEAVE_ANIMATION_TIME = 0.8;
-const SCALE_ANIMATION_TIME = 0.3;
+const SCALE_ANIMATION_TIME = 0.2;
+const TRANSLATION_ANIMATION_TIME = 0.3;
 
-const MIN_SCALE = 0.7;
+const MIN_SCALE = 0.9;
+const MAX_DESATURATE = 0.7;
+const LABEL_MIN_OPACITY = 150;
 
 const SiteLogo = new Lang.Class({
     Name: 'HowDoISiteLogo',
@@ -55,19 +59,37 @@ const SiteLogo = new Lang.Class({
             Lang.bind(this, this._on_button_release)
         );
 
-        this._logo_box = new St.Bin();
-        this._label = new St.Label({
-            style_class: 'howdoi-site-logo-label',
-            opacity: 100
+        let box = new St.BoxLayout({
+            vertical: true
         });
-        this.actor.add(this._logo_box, {
+
+        this._scroll = new St.ScrollView();
+        this._scroll.set_policy(
+            Gtk.PolicyType.EXTERNAL,
+            Gtk.PolicyType.EXTERNAL
+        );
+        this._scroll.add_actor(box);
+
+        this._name = new St.Label({
+            style_class: 'howdoi-site-logo-name',
+            scale_x: MIN_SCALE,
+            scale_y: MIN_SCALE
+        });
+        this._name.set_pivot_point(0.5, 0.5);
+
+        this._audience = new St.Label({
+            style_class: 'howdoi-site-logo-audience',
+            opacity: LABEL_MIN_OPACITY
+        });
+
+        box.add(this._name, {
             expand: true,
             x_align: St.Align.MIDDLE,
             y_align: St.Align.START,
             x_fill: false,
             y_fill: false
         });
-        this.actor.add(this._label, {
+        box.add(this._audience, {
             expand: false,
             x_align: St.Align.MIDDLE,
             y_align: St.Align.START,
@@ -75,8 +97,10 @@ const SiteLogo = new Lang.Class({
             y_fill: false
         });
 
+        this.actor.add_child(this._scroll);
+
         this._desaturate_effect = new Clutter.DesaturateEffect();
-        this._desaturate_effect.set_factor(1);
+        this._desaturate_effect.set_factor(MAX_DESATURATE);
         this.actor.add_effect(this._desaturate_effect);
 
         this.site_info = null;
@@ -102,12 +126,21 @@ const SiteLogo = new Lang.Class({
             transition: 'easeOutQuad'
         });
 
-        Tweener.removeTweens(this._label);
-        Tweener.addTween(this._label, {
+        Tweener.removeTweens(this._name);
+        Tweener.addTween(this._name, {
+            delay: SCALE_ANIMATION_TIME,
+            scale_y: 1,
+            scale_x: 1,
+            time: SCALE_ANIMATION_TIME,
+            transition: 'easeOutBack'
+        });
+
+        Tweener.removeTweens(this._audience);
+        Tweener.addTween(this._audience, {
             opacity: 255,
             time: ENTER_ANIMATION_TIME,
             transition: 'easeOutQuad'
-        })
+        });
     },
 
     _on_leave: function() {
@@ -123,17 +156,25 @@ const SiteLogo = new Lang.Class({
 
         Tweener.removeTweens(this._desaturate_effect);
         Tweener.addTween(this._desaturate_effect, {
-            factor: 1,
+            factor: MAX_DESATURATE,
             time: LEAVE_ANIMATION_TIME,
             transition: 'easeOutQuad'
         });
 
-        Tweener.removeTweens(this._label);
-        Tweener.addTween(this._label, {
-            opacity: 100,
+        Tweener.removeTweens(this._name);
+        Tweener.addTween(this._name, {
+            scale_y: MIN_SCALE,
+            scale_x: MIN_SCALE,
+            time: SCALE_ANIMATION_TIME,
+            transition: 'easeInBack'
+        });
+
+        Tweener.removeTweens(this._audience);
+        Tweener.addTween(this._audience, {
+            opacity: LABEL_MIN_OPACITY,
             time: LEAVE_ANIMATION_TIME,
-            transition:'easeOutQuad'
-        })
+            transition: 'easeOutQuad'
+        });
     },
 
     _on_button_release: function() {
@@ -146,13 +187,49 @@ const SiteLogo = new Lang.Class({
 
     set_site: function(site_info) {
         this.site_info = site_info;
-        if(this._logo_box.child) this._logo_box.child.destroy();
-        let scale_factor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
-        let image_file = Gio.file_new_for_uri(site_info.logo_url);
-        let texture_cache = St.TextureCache.get_default();
-        let image = texture_cache.load_file_async(image_file, -1, -1, scale_factor);
-        this._logo_box.set_child(image);
-        this._label.set_text(site_info.audience);
+
+        if(!Utils.is_blank(this._name.text)) {
+            Tweener.removeTweens(this._desaturate_effect);
+            Tweener.removeTweens(this.actor);
+            Tweener.removeTweens(this._name);
+            Tweener.removeTweens(this._audience);
+
+            Tweener.addTween(this._name, {
+                translation_x: -this.actor.width,
+                time: TRANSLATION_ANIMATION_TIME,
+                transition: 'easeOutQuad',
+                onComplete: Lang.bind(this, function() {
+                    this._name.translation_x = this.actor.width;
+                    this._name.set_text(site_info.name);
+
+                    Tweener.addTween(this._name, {
+                        translation_x: 0,
+                        time: TRANSLATION_ANIMATION_TIME,
+                        transition: 'easeOutQuad'
+                    });
+                })
+            });
+
+            Tweener.addTween(this._audience, {
+                translation_x: -this.actor.width,
+                time: TRANSLATION_ANIMATION_TIME,
+                transition: 'easeOutQuad',
+                onComplete: Lang.bind(this, function() {
+                    this._audience.translation_x = this.actor.width;
+                    this._audience.set_text(site_info.audience);
+
+                    Tweener.addTween(this._audience, {
+                        translation_x: 0,
+                        time: TRANSLATION_ANIMATION_TIME,
+                        transition: 'easeOutQuad'
+                    });
+                })
+            });
+        }
+        else {
+            this._name.set_text(site_info.name);
+            this._audience.set_text(site_info.audience);
+        }
     },
 
     destroy: function() {
