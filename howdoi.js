@@ -33,6 +33,7 @@ const AnswersView = Me.imports.answers_view;
 const AnswersProvider = Me.imports.answers_provider;
 const ProgressBar = Me.imports.progress_bar;
 const StackExchangeSites = Me.imports.stackexchange_sites;
+const SiteLogo = Me.imports.site_logo;
 
 const CONNECTION_IDS = {
     CAPTURED_EVENT: 0
@@ -125,6 +126,15 @@ const HowDoI = new Lang.Class({
 
         this._background_actor = new St.BoxLayout({
             style_class: 'howdoi-background'
+        });
+
+        this._site_logo = new SiteLogo.SiteLogo();
+        this._background_actor.add(this._site_logo.actor, {
+            expand: true,
+            x_fill: false,
+            y_fill: false,
+            x_align: St.Align.START,
+            y_align: St.Align.END
         });
 
         let preferences_icon = new St.Icon({
@@ -514,6 +524,7 @@ const HowDoI = new Lang.Class({
     set_site: function(site_info) {
         this._answers_provider.site = site_info;
         this._current_site = site_info;
+	this._site_logo.set_site(site_info);
     },
 
     reset_site: function() {
@@ -598,6 +609,7 @@ const HowDoI = new Lang.Class({
     destroy: function() {
         Utils.HTTP_CACHE.dump();
         this._disconnect_captured_event();
+        this._site_logo.destroy();
         this._progress_bar.destroy();
         this._background_actor.destroy();
         this._answers_provider.destroy();
