@@ -29,7 +29,7 @@ const BLOCK_TYPE = {
     BLOCKQUOTE: 2
 };
 const ALLOWED_TAGS =
-    '<b><big><i><s><sub><sup><small><tt><u><em><strong><li><a>';
+    '<b><big><i><s><sub><sup><small><tt><u><em><strong><li><a><h1><h2><h3>';
 const BLOCK_REGEXP =
     /(<code>)([\s\S]+?)<\/code>|(<blockquote>)([\s\S]+?)<\/blockquote>/ig;
 const LINKS_REGEXP = /<a href="(.*?)".*?>(.*?)<\/a>/gi;
@@ -54,6 +54,12 @@ const Answer = new Lang.Class({
         markup = markup.replace(/<\/strong>/g, '</b>');
         markup = markup.replace(/<li>/g, ' %s '.format(LIST_ITEM_SYMBOL));
         markup = markup.replace(/<\/li>/g, '\n');
+        markup = markup.replace(/<h1>/g, '<span size="xx-large">');
+        markup = markup.replace(/<\/h1>/g, '</span>');
+        markup = markup.replace(/<h2>/g, '<span size="x-large">');
+        markup = markup.replace(/<\/h2>/g, '</span>');
+        markup = markup.replace(/<h3>/g, '<span size="large">');
+        markup = markup.replace(/<\/h3>/g, '</span>');
 
         return markup;
     },
