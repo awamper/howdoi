@@ -283,14 +283,8 @@ const HowDoI = new Lang.Class({
 
     _reposition: function() {
         let monitor = Main.layoutManager.currentMonitor;
-        let is_primary = monitor.index === Main.layoutManager.primaryIndex;
-
-        let available_width = monitor.width;
-        let available_height = monitor.height;
-        if(is_primary) available_height -= Main.panel.actor.height;
-
-        this.actor.x = Math.round(available_width / 2 - this.actor.width / 2);
-        this.actor.y = Math.round(available_height / 2 - this.actor.height / 2);
+        this.actor.x = Math.round(monitor.width / 2 - this.actor.width / 2);
+        this.actor.y = Math.round(monitor.height / 2 - this.actor.height / 2);
     },
 
     _connect_captured_event: function() {
