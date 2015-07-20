@@ -75,7 +75,7 @@ const SearchEntry = new Lang.Class({
         });
 
         this._entry_suggestions =
-            new EntrySuggestions.EntrySuggestions(this.actor);
+            new EntrySuggestions.EntrySuggestions(this);
         this._entry_suggestions.connect(
             'activate',
             Lang.bind(this, this._activate)
@@ -83,14 +83,8 @@ const SearchEntry = new Lang.Class({
     },
 
     _on_text_changed: function() {
-        if(this.is_empty()) {
-            this._secondary_icon.hide();
-            this.query = '';
-        }
-        else {
-            this._secondary_icon.show();
-            this.query = this.actor.get_text();
-        }
+        if(this.is_empty()) this._secondary_icon.hide();
+        else this._secondary_icon.show();
 
         if(this.is_empty()) this._history.reset();
 
@@ -200,16 +194,13 @@ const SearchEntry = new Lang.Class({
         return !this.is_empty() ? this.actor.get_text() : '';
     },
 
-    set query(text) {
-        if(Utils.is_blank(text)) this.actor.query = '';
-        let query = text;
+    get query() {
+        if(Utils.is_blank(this.text)) return '';
+
+        let query = this.text;
         let keyword = Extension.howdoi.get_keyword_for_query(query);
         if(keyword) query = query.slice(keyword.length);
-        this.actor.query = query;
-    },
-
-    get query() {
-        return this.actor.query;
+        return query;
     },
 
     get keyword() {

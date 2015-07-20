@@ -150,7 +150,7 @@ const EntrySuggestions = new Lang.Class({
     Name: 'HowDoIEntrySuggestions',
     Extends: PopupDialog.PopupDialog,
 
-    _init: function(entry) {
+    _init: function(search_entry) {
         this.parent({
             modal: false
         });
@@ -161,7 +161,7 @@ const EntrySuggestions = new Lang.Class({
         });
         this.actor.add_child(this._box);
 
-        this._entry = entry;
+        this._entry = search_entry;
         this._entry.clutter_text.connect(
             'key-press-event',
             Lang.bind(this, this._on_entry_key_press)
@@ -257,7 +257,13 @@ const EntrySuggestions = new Lang.Class({
 
     _on_suggestion_activate: function(suggestion_item) {
         this._ignore_text_change = true;
-        this._entry.set_text(suggestion_item.suggestion.text);
+        let suggestion_text = (
+            this._entry.keyword
+            ? this._entry.keyword + ' '
+            : ''
+        ) + suggestion_item.suggestion.text
+
+        this._entry.set_text(suggestion_text);
         this.hide();
         this.emit('activate');
     },
@@ -277,14 +283,14 @@ const EntrySuggestions = new Lang.Class({
 
     _reposition: function() {
         let margin_top = 3;
-        let [x, y] = this._entry.get_transformed_position();
-        let allocation_box = this._entry.get_allocation_box();
+        let [x, y] = this._entry.actor.get_transformed_position();
+        let allocation_box = this._entry.actor.get_allocation_box();
 
         this._box.height = this._calculate_height();
-        this._box.width = this._entry.width;
+        this._box.width = this._entry.actor.width;
 
         this.actor.x = x;
-        this.actor.y = this._entry.height + y + margin_top;
+        this.actor.y = this._entry.actor.height + y + margin_top;
     },
 
     _highlight_suggestions: function(query) {
@@ -301,7 +307,7 @@ const EntrySuggestions = new Lang.Class({
 
     _show_suggestions: function(suggestions) {
         let first_suggestion = {
-            text: this._entry.text,
+            text: this._entry.query.trim(),
             relevance: 9999999,
             type: GoogleSuggestions.SUGGESTION_TYPE.QUERY,
             calc_result: ''
@@ -436,18 +442,18 @@ const EntrySuggestions = new Lang.Class({
             return;
         }
 
-        if(Utils.is_empty_entry(this._entry)) {
+        if(this._entry.is_empty()) {
             this.clear();
             this.hide();
             return;
         }
 
-        let cached = this._cache.get(this._entry.text.trim());
+        let cached = this._cache.get(this._entry.query.trim());
 
         if(cached) {
             this.show();
             this._show_suggestions(cached);
-            this._highlight_suggestions(this._entry.text);
+            this._highlight_suggestions(this._entry.query);
             return;
         }
 
@@ -465,7 +471,7 @@ const EntrySuggestions = new Lang.Class({
                 }
 
                 this._suggestions.get_suggestions(
-                    this._entry.text,
+                    this._entry.query,
                     types,
                     Utils.SETTINGS.get_int(PrefsKeys.MAX_SUGGESTIONS),
                     Lang.bind(this, this._on_suggestions)
@@ -477,7 +483,7 @@ const EntrySuggestions = new Lang.Class({
     },
 
     _on_suggestions: function(query, result, error_message) {
-        if(this._entry.text !== query) return;
+        if(this._entry.query !== query) return;
         if(result === null) {
             log('EntrySuggestions:_on_text_changed(): %s'.format(
                 error_message)
@@ -532,9 +538,19 @@ const EntrySuggestions = new Lang.Class({
         let suggestion_index = this._suggestion_items.indexOf(suggestion_item);
 
         if(suggestion_index > 0) {
-            let real_length = this._suggestion_items[0].suggestion.text.length;
             this._ignore_text_change = true;
-            this._entry.set_text(suggestion_item.suggestion.text);
+            let real_length = this._suggestion_items[0].suggestion.text.length;
+            let suggestion_text = suggestion_item.suggestion.text;
+
+            if(this._entry.keyword) {
+                real_length += this._entry.keyword.length + 1;
+                suggestion_text = '%s %s'.format(
+                    this._entry.keyword,
+                    suggestion_text
+                );
+            }
+
+            this._entry.set_text(suggestion_text);
 
             let should_select = Utils.starts_with(
                 suggestion_item.suggestion.text,
