@@ -213,6 +213,10 @@ const SearchEntry = new Lang.Class({
         return this.actor.query;
     },
 
+    get keyword() {
+        return Extension.howdoi.get_keyword_for_query(this.text);
+    },
+
     get clutter_text() {
         return this.actor.clutter_text;
     },
