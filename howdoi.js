@@ -63,11 +63,7 @@ const HowDoI = new Lang.Class({
         this._search_entry.connect(
             'activate',
             Lang.bind(this, function(search_entry) {
-                let query = search_entry.text;
-                if(this._current_keyword !== null) {
-                    query = query.slice(this._current_keyword.length);
-                }
-                this._search(query);
+                this._search(this._search_entry.query);
             })
         );
         this._search_entry.clutter_text.connect(
@@ -162,7 +158,6 @@ const HowDoI = new Lang.Class({
             PrefsKeys.KEYWORDS
         ));
         this._current_site = null;
-        this._current_keyword = null;
 
         Utils.SETTINGS.connect(
             'changed::' + PrefsKeys.KEYWORDS,
@@ -277,7 +272,6 @@ const HowDoI = new Lang.Class({
 
         if(this._current_site.name !== site_name) {
             this.set_site(this._get_site_by_name(site_name));
-            this._current_keyword = keyword;
         }
 
         return Clutter.EVENT_PROPAGATE;
@@ -545,7 +539,6 @@ const HowDoI = new Lang.Class({
         ];
         if(this._current_site.name !== default_site.name) {
             this.set_site(default_site);
-            this._current_keyword = null;
         }
     },
 
