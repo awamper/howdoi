@@ -28,11 +28,15 @@ const BLOCK_TYPE = {
     CODE: 1,
     BLOCKQUOTE: 2
 };
-const ALLOWED_TAGS =
-    '<b><big><i><s><sub><sup><small><tt><u><em><strong><li><a><h1><h2><h3>';
+const ALLOWED_TAGS = (
+    '<b><big><i><s><sub><sup><small><tt><u>' +
+    '<em><strong><li><a><h1><h2><h3><img>'
+);
 const BLOCK_REGEXP =
     /(<code>)([\s\S]+?)<\/code>|(<blockquote>)([\s\S]+?)<\/blockquote>/ig;
-const LINKS_REGEXP = /<a href="(.*?)".*?>(.*?)<\/a>/gi;
+const LINKS_REGEXP =
+    /(?:<a href="(.*?)".*?>(.*?)<\/a>)|(?:<img src="(.*?)".*?>)/gi;
+const IMAGE_TITLE = '[IMAGE, hover to see]';
 
 const LIST_ITEM_SYMBOL = '\u2022';
 
@@ -69,9 +73,19 @@ const Answer = new Lang.Class({
         let new_content = block.content;
 
         while((match = LINKS_REGEXP.exec(block.content)) !== null) {
-            let url = match[1].trim();
-            let title = match[2];
-            let link_markup = '[a href="%s"]%s[/a]'.format(url, title);
+            let url, title;
+            let link_markup = '[a href="%s"]%s[/a]';
+
+            if(!Utils.is_blank(match[3])) {
+                url = match[3].trim();
+                link_markup = link_markup.format(url, IMAGE_TITLE);
+            }
+            else {
+                url = match[1].trim();
+                title = match[2];
+                link_markup = link_markup.format(url, title);
+            }
+
             new_content = new_content.replace(match[0], link_markup);
         }
 

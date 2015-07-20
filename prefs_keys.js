@@ -34,3 +34,4 @@ const HISTORY_LIMIT = 'history-limit';
 const QUESTION_TITLE = 'question-title';
 const ANSWER_VIEW_MODE = 'answer-view-mode';
 const KEYWORDS = 'keywords';
+const MAX_IMAGE_SIZE = 'max-image-size';

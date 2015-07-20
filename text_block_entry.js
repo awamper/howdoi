@@ -28,9 +28,11 @@ const Tweener = imports.ui.tweener;
 const Params = imports.misc.params;
 const Main = imports.ui.main;
 const ExtensionUtils = imports.misc.extensionUtils;
+const Animation = imports.ui.animation;
 
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
+const PrefsKeys = Me.imports.prefs_keys;
 const Answer = Me.imports.answer;
 const Tooltip = Me.imports.tooltip;
 const Extension = Me.imports.extension;
@@ -48,6 +50,97 @@ const LinkPopup = new Lang.Class({
 
     set: function(link) {
         if(link !== null) this._label.set_text(link.url);
+    }
+});
+
+const SpinnerBox = new Lang.Class({
+    Name: 'HowDoISpinnerBox',
+
+    _init: function() {
+        this.actor = new St.BoxLayout();
+
+        this._label = new St.Label({
+            text: 'Loading...'
+        });
+
+        let spinner_icon = Gio.File.new_for_uri(
+            'resource:///org/gnome/shell/theme/process-working.svg'
+        );
+        this._spinner = new Animation.AnimatedIcon(spinner_icon, 24);
+
+        this.actor.add_child(this._spinner.actor);
+        this.actor.add_child(this._label);
+        this.actor.hide();
+    },
+
+    show: function() {
+        this._spinner.play();
+        this.actor.show();
+    },
+
+    hide: function() {
+        this._spinner.stop();
+        this.actor.hide();
+    },
+
+    destroy: function() {
+        this.actor.destroy();
+    }
+});
+
+const ImagePreviewer = new Lang.Class({
+    Name: 'HowDoIImagePreviewer',
+    Extends: Tooltip.Tooltip,
+
+    _init: function() {
+        this.parent();
+        this._label.destroy();
+
+        this._spinner = new SpinnerBox();
+        this._image_box = new St.Bin();
+        this.actor.add_child(this._spinner.actor);
+        this.actor.add_child(this._image_box);
+    },
+
+    preview: function(uri) {
+        if(uri === null) {
+            this.hide();
+            return;
+        }
+
+        this._spinner.show();
+        this.show();
+
+        let max_size = Utils.SETTINGS.get_int(PrefsKeys.MAX_IMAGE_SIZE);
+        let image_file = Gio.file_new_for_uri(uri);
+        let texture_cache = St.TextureCache.get_default();
+        let scale_factor = St.ThemeContext.get_for_stage(
+            global.stage
+        ).scale_factor;
+        let image = texture_cache.load_file_async(
+            image_file,
+            max_size,
+            max_size,
+            scale_factor
+        );
+        image.connect('size-change',
+            Lang.bind(this, function() {
+                this._spinner.hide();
+                this.reposition();
+            })
+        );
+        this._image_box.set_child(image);
+    },
+
+    _hide_done: function() {
+        this._spinner.hide();
+        if(this._image_box.child) this._image_box.child.destroy();
+        this.parent();
+    },
+
+    destroy: function() {
+        this._spinner.destroy();
+        this.parent();
     }
 });
 
@@ -135,12 +228,14 @@ const TextBlockEntry = new Lang.Class({
         Main.uiGroup.add_child(this._copy_button);
 
         this._link_popup = new LinkPopup();
+        this._image_previewer = new ImagePreviewer();
         this._link_entered = null;
         this._link_maps = [];
 
         this.connect('link-clicked',
             Lang.bind(this, function(sender, link) {
                 this._link_popup.hide();
+                this._image_previewer.hide();
                 if(Utils.is_blank(link.url)) return;
                 Gio.app_info_launch_default_for_uri(
                     link.url,
@@ -151,14 +246,25 @@ const TextBlockEntry = new Lang.Class({
         );
         this.connect('link-enter',
             Lang.bind(this, function(sender, link) {
-                this._link_popup.set(link);
-                this._link_popup.show();
+                if(link.title === Answer.IMAGE_TITLE) {
+                    this._image_previewer.preview(link.url);
+                }
+                else {
+                    this._link_popup.set(link);
+                    this._link_popup.show();
+                }
             })
         );
         this.connect('link-leave',
             Lang.bind(this, function(sender) {
-                this._link_popup.set(null);
-                this._link_popup.hide();
+                if(this._link_popup.shown) {
+                    this._link_popup.set(null);
+                    this._link_popup.hide();
+                }
+                if(this._image_previewer.shown) {
+                    this._image_previewer.preview(null);
+                    this._image_previewer.hide();
+                }
             })
         );
 
@@ -266,6 +372,7 @@ const TextBlockEntry = new Lang.Class({
         this.actor.text_block = null;
 
         this._remove_timeout();
+        this._image_previewer.destroy();
         this._link_popup.destroy();
         this._copy_button.destroy();
         this.actor.destroy();
@@ -307,6 +414,7 @@ const TextBlockEntry = new Lang.Class({
 
         if(link !== -1) {
             if(this._link_popup.shown) this._link_popup.reposition();
+            if(this._image_previewer.shown) this._image_previewer.reposition();
             global.screen.set_cursor(Meta.Cursor.POINTING_HAND);
             if(!this.params.track_links_hover) return Clutter.EVENT_PROPAGATE;
 

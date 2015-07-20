@@ -78,5 +78,9 @@
     <key type="s" name="keywords">
         <default>'{}'</default>
     </key>
+
+    <key type="i" name="max-image-size">
+        <default>500</default>
+    </key>
   </schema>
 </schemalist>

@@ -593,6 +593,16 @@ const HowDoIPrefsWidget = new GObject.Class({
             'int'
         );
 
+        spin_properties.lower = 100;
+        spin_properties.upper = 1000;
+        spin_properties.step_increment = 50;
+        page.add_spin(
+            'Max image size(px):',
+            PrefsKeys.MAX_IMAGE_SIZE,
+            spin_properties,
+            'int'
+        );
+
         page.add_boolean(
             'Show question title:',
             PrefsKeys.QUESTION_TITLE
