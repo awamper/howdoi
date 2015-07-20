@@ -177,14 +177,13 @@ const SearchEntry = new Lang.Class({
 
     history_next: function() {
         let next = this._history.next();
+        this._entry_suggestions.ignore_change = true;
 
         if(next) {
-            this._entry_suggestions.ignore_change = true;
             this.set_text(next);
             return Clutter.EVENT_STOP;
         }
         else {
-            this._entry_suggestions.ignore_change = true;
             this.set_text('');
             return Clutter.EVENT_PROPAGATE;
         }
