@@ -41,6 +41,11 @@ const COPY_SELECTION_TIMEOUT_MS = 400;
 const TIMEOUT_IDS = {
     SELECTION: 0
 };
+const LINK_TOOLTIP_MARKUP = (
+    '<b>%s</b>\n' +
+    '<small><i>Left-click to open answer in the browser</i></small>\n' +
+    '<small><i>Right-click to copy answer link to clipboard</i></small>'
+);
 
 const LINKS_REGEXP = /\[a href="(.*?)"\](.*?)\[\/a\]/gi;
 
