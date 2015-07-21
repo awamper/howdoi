@@ -214,5 +214,35 @@ const Answer = new Lang.Class({
 
     get text_blocks() {
         return this.get_text_blocks();
+    },
+
+    get first_code() {
+        let result = '';
+
+        for each(let block in this.text_blocks) {
+            if(block.type === BLOCK_TYPE.CODE) {
+                let lines_count = block.content.split('\n').length;
+
+                if(lines_count > 1) {
+                    result = block.content;
+                    break;
+                }
+            }
+        }
+
+        return result;
+    },
+
+    get all_code() {
+        let result = '';
+
+        for each(let block in this.text_blocks) {
+            if(block.type === BLOCK_TYPE.CODE) {
+                let lines_count = block.content.split('\n').length;
+                if(lines_count > 1) result += block.content;
+            }
+        }
+
+        return result;
     }
 });
