@@ -43,8 +43,8 @@ const TIMEOUT_IDS = {
 };
 const LINK_TOOLTIP_MARKUP = (
     '<b>%s</b>\n' +
-    '<small><i>Left-click to open answer in the browser</i></small>\n' +
-    '<small><i>Right-click to copy answer link to clipboard</i></small>'
+    '<small><i>Left-click to open url in the browser</i></small>\n' +
+    '<small><i>Right-click to copy url to the clipboard</i></small>'
 );
 
 const LINKS_REGEXP = /\[a href="(.*?)"\](.*?)\[\/a\]/gi;
