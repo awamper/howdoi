@@ -36,6 +36,7 @@ const PrefsKeys = Me.imports.prefs_keys;
 const Answer = Me.imports.answer;
 const Tooltip = Me.imports.tooltip;
 const Extension = Me.imports.extension;
+const AnimatedLabel = Me.imports.animated_label;
 
 const COPY_SELECTION_TIMEOUT_MS = 400;
 const TIMEOUT_IDS = {
@@ -54,7 +55,11 @@ const LinkPopup = new Lang.Class({
     Extends: Tooltip.Tooltip,
 
     set: function(link) {
-        if(link !== null) this._label.set_text(link.url);
+        if(link !== null) {
+            this._label.clutter_text.set_markup(
+                LINK_TOOLTIP_MARKUP.format(link.url)
+            );
+        }
     }
 });
 
@@ -238,15 +243,26 @@ const TextBlockEntry = new Lang.Class({
         this._link_maps = [];
 
         this.connect('link-clicked',
-            Lang.bind(this, function(sender, link) {
+            Lang.bind(this, function(sender, link, button) {
                 this._link_popup.hide();
                 this._image_previewer.hide();
                 if(Utils.is_blank(link.url)) return;
-                Gio.app_info_launch_default_for_uri(
-                    link.url,
-                    Utils.make_launch_context()
-                );
-                Extension.howdoi.hide();
+
+                if(button === Clutter.BUTTON_PRIMARY) {
+                    Gio.app_info_launch_default_for_uri(
+                        link.url,
+                        Utils.make_launch_context()
+                    );
+                    Extension.howdoi.hide();
+                }
+                else {
+                    let clipboard = St.Clipboard.get_default();
+                    clipboard.set_text(
+                        St.ClipboardType.CLIPBOARD,
+                        link.url
+                    );
+                    AnimatedLabel.flash(link.url);
+                }
             })
         );
         this.connect('link-enter',
@@ -450,9 +466,8 @@ const TextBlockEntry = new Lang.Class({
 
     _on_text_button_release_event: function(o, event) {
         let button = event.get_button();
-        if(button !== Clutter.BUTTON_PRIMARY) return Clutter.EVENT_PROPAGATE;
         let link = this._find_link_at_coords(event)
-        if(link !== -1) this.emit('link-clicked', link);
+        if(link !== -1) this.emit('link-clicked', link, button);
         return Clutter.EVENT_PROPAGATE;
     },
 
