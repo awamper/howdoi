@@ -282,16 +282,7 @@ const AnswersView = new Lang.Class({
             visible: false
         });
         this._view_mode_btn.connect('clicked',
-            Lang.bind(this, function() {
-                if(this._view_mode_btn.has_style_pseudo_class('disabled')) {
-                    this._view_mode_btn.remove_style_pseudo_class('checked');
-                    return;
-                }
-
-                let mode = Constants.ANSWER_VIEW_MODE.ALL;
-                if(this._view_mode_btn.checked) mode = Constants.ANSWER_VIEW_MODE.ONLY_CODE;
-                this.active_answer.set_mode(mode);
-            })
+            Lang.bind(this, this.on_view_mode_clicked)
         );
 
         let button_box = new St.BoxLayout({
@@ -491,6 +482,20 @@ const AnswersView = new Lang.Class({
         });
     },
 
+    on_view_mode_clicked: function() {
+        if(this._view_mode_btn.has_style_pseudo_class('disabled')) {
+            this._view_mode_btn.remove_style_pseudo_class('checked');
+            return;
+        }
+
+        let mode = Constants.ANSWER_VIEW_MODE.ALL;
+        if(this._view_mode_btn.checked) {
+            mode = Constants.ANSWER_VIEW_MODE.ONLY_CODE;
+        }
+
+        this.active_answer.set_mode(mode);
+    },
+
     set_answers: function(answers=null) {
         if(this._animation_running) {
             Tweener.removeTweens(this._scroll_view);
@@ -628,6 +633,10 @@ const AnswersView = new Lang.Class({
 
     get page_indicators() {
         return this._page_indicators;
+    },
+
+    get view_mode_btn() {
+        return this._view_mode_btn;
     }
 });
 Signals.addSignalMethods(AnswersView.prototype);

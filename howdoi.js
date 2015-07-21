@@ -188,6 +188,8 @@ const HowDoI = new Lang.Class({
         let code = event.get_key_code();
         let symbol = event.get_key_symbol();
         let control = event.has_control_modifier();
+        let shift = event.has_shift_modifier();
+        let alt = (event.get_state() & Clutter.ModifierType.MOD1_MASK)
         let ch = Utils.get_unichar(symbol);
 
         if(symbol === Clutter.Escape) {
@@ -198,6 +200,7 @@ const HowDoI = new Lang.Class({
                 this.hide();
             }
         }
+        // <Ctrl>V
         else if(code === 55 && control) {
             St.Clipboard.get_default().get_text(
                 St.ClipboardType.CLIPBOARD,
@@ -209,6 +212,43 @@ const HowDoI = new Lang.Class({
                     this._search(this._search_entry.query);
                 })
             );
+        }
+        // <Ctrl><Shift>C
+        else if(code === 54 && control && shift) {
+            if(this._answers_view.n_results < 1) return Clutter.EVENT_STOP;
+            let code = this._answers_view.active_answer.answer.all_code;
+
+            if(!Utils.is_blank(code)) {
+                St.Clipboard.get_default().set_text(
+                    St.ClipboardType.CLIPBOARD,
+                    code
+                );
+            }
+        }
+        // <Ctrl><Alt>C
+        else if(code === 54 && control && alt) {
+            if(this._answers_view.n_results < 1) return Clutter.EVENT_STOP;
+            let code = this._answers_view.active_answer.answer.first_code;
+
+            if(!Utils.is_blank(code)) {
+                St.Clipboard.get_default().set_text(
+                    St.ClipboardType.CLIPBOARD,
+                    code
+                );
+            }
+        }
+        // <Ctrl>S
+        else if(code === 39 && control) {
+            if(this._answers_view.n_results > 0) {
+                if(this._answers_view.view_mode_btn.checked) {
+                    this._answers_view.view_mode_btn.checked = false;
+                }
+                else {
+                    this._answers_view.view_mode_btn.checked = true;
+                }
+
+                this._answers_view.on_view_mode_clicked();
+            }
         }
         else if(ch) {
             this._search_entry.grab_key_focus(false);

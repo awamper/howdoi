@@ -95,6 +95,8 @@ const SearchEntry = new Lang.Class({
         let symbol = event.get_key_symbol();
         let control = event.has_control_modifier();
         let shift = event.has_shift_modifier();
+        let alt = (event.get_state() & Clutter.ModifierType.MOD1_MASK)
+        let code = event.get_key_code();
 
         if(symbol === Clutter.Right && !shift && !control) {
             let selection = this.clutter_text.get_selection();
@@ -117,6 +119,10 @@ const SearchEntry = new Lang.Class({
         else if(symbol === Clutter.Down && !control && !shift) {
             if(this._entry_suggestions.shown) return Clutter.EVENT_PROPAGATE;
             return this.history_next();
+        }
+        else if(code === 54 && control && alt) {
+            Extension.howdoi._on_key_press_event(this.actor, event);
+            return Clutter.EVENT_STOP;
         }
 
         return Clutter.EVENT_PROPAGATE;
