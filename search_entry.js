@@ -34,7 +34,7 @@ const SearchEntry = new Lang.Class({
     _init: function() {
         this.actor = new St.Entry({
             style_class: 'howdoi-search-entry',
-            hint_text: 'Type to search...',
+            hint_text: 'Type or <Ctrl>V to search...',
             track_hover: true,
             can_focus: true
         });
