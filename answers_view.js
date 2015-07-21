@@ -260,15 +260,7 @@ const AnswersView = new Lang.Class({
         this._copy_code_btn.connect('clicked',
             Lang.bind(this, function() {
                 if(this._copy_code_btn.has_style_pseudo_class('disabled')) return;
-                let code = '';
-                let text_blocks = this.active_answer.answer.get_text_blocks();
-
-                for each(let block in text_blocks) {
-                    if(block.type === Answer.BLOCK_TYPE.CODE) {
-                        let lines_count = block.content.split('\n').length;
-                        if(lines_count > 1) code += block.content;
-                    }
-                }
+                let code = this.active_answer.answer.all_code;
 
                 if(!Utils.is_blank(code)) {
                     St.Clipboard.get_default().set_text(
