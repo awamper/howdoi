@@ -32,6 +32,7 @@ const TextBlockEntry = Me.imports.text_block_entry;
 const Extension = Me.imports.extension;
 const Constants = Me.imports.constants;
 const Tooltip = Me.imports.tooltip;
+const AnimatedLabel = Me.imports.animated_label;
 
 const QuestionTitle = new Lang.Class({
     Name: 'HowDoIQuestionTitle',
@@ -66,12 +67,25 @@ const QuestionTitle = new Lang.Class({
             })
         );
         this._label.connect('button-release-event',
-            Lang.bind(this, function() {
-                Gio.app_info_launch_default_for_uri(
-                    answer.share_link,
-                    Utils.make_launch_context()
-                );
-                Extension.howdoi.hide();
+            Lang.bind(this, function(label, event) {
+                let button = event.get_button();
+
+                if(button === Clutter.BUTTON_PRIMARY) {
+                    Gio.app_info_launch_default_for_uri(
+                        answer.share_link,
+                        Utils.make_launch_context()
+                    );
+                    Extension.howdoi.hide();
+                }
+                else {
+                    this._tooltip.hide();
+                    let clipboard = St.Clipboard.get_default();
+                    clipboard.set_text(
+                        St.ClipboardType.CLIPBOARD,
+                        answer.share_link
+                    );
+                    AnimatedLabel.flash(answer.share_link);
+                }
             })
         );
         this.actor.add(this._label, {
