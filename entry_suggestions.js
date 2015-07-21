@@ -536,22 +536,21 @@ const EntrySuggestions = new Lang.Class({
         suggestion_item.actor.add_style_pseudo_class('selected');
 
         let suggestion_index = this._suggestion_items.indexOf(suggestion_item);
+        let suggestion_text = suggestion_item.suggestion.text;
+        let real_length = this._suggestion_items[0].suggestion.text.length;
+
+        if(this._entry.keyword) {
+            real_length += this._entry.keyword.length + 1;
+            suggestion_text = '%s %s'.format(
+                this._entry.keyword,
+                suggestion_text
+            );
+        }
+
+        this._ignore_text_change = true;
+        this._entry.set_text(suggestion_text);
 
         if(suggestion_index > 0) {
-            this._ignore_text_change = true;
-            let real_length = this._suggestion_items[0].suggestion.text.length;
-            let suggestion_text = suggestion_item.suggestion.text;
-
-            if(this._entry.keyword) {
-                real_length += this._entry.keyword.length + 1;
-                suggestion_text = '%s %s'.format(
-                    this._entry.keyword,
-                    suggestion_text
-                );
-            }
-
-            this._entry.set_text(suggestion_text);
-
             let should_select = Utils.starts_with(
                 suggestion_item.suggestion.text,
                 this._suggestion_items[0].suggestion.text
