@@ -204,7 +204,9 @@ const HowDoI = new Lang.Class({
                 Lang.bind(this, function(clipboard, text) {
                     if(Utils.is_blank(text)) return;
                     this._search_entry.grab_key_focus(true);
+                    this._search_entry.suggestions.ignore_change = true;
                     this._search_entry.set_text(text);
+                    this._search(this._search_entry.query);
                 })
             );
         }
