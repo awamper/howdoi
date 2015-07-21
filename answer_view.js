@@ -106,7 +106,9 @@ const QuestionTitle = new Lang.Class({
     set_title: function(title) {
         title = Utils.strip_tags(title);
         this._label.clutter_text.set_markup('Q: ' + title);
-        this._tooltip.set_markup(title);
+        this._tooltip.set_markup(
+            TextBlockEntry.LINK_TOOLTIP_MARKUP.format(title)
+        );
     }
 });
 
