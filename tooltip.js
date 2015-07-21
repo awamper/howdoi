@@ -52,5 +52,9 @@ const Tooltip = new Lang.Class({
 
     set: function(text) {
         this._label.set_text(text);
+    },
+
+    set_markup: function(markup) {
+        this._label.clutter_text.set_markup(markup);
     }
 });

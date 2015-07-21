@@ -90,8 +90,9 @@ const QuestionTitle = new Lang.Class({
     },
 
     set_title: function(title) {
-        this._label.set_text('Q: ' + title);
-        this._tooltip.set(title);
+        title = Utils.strip_tags(title);
+        this._label.clutter_text.set_markup('Q: ' + title);
+        this._tooltip.set_markup(title);
     }
 });
 
