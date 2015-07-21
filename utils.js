@@ -349,3 +349,13 @@ function make_launch_context(params={}) {
 
     return launch_context;
 }
+
+function fix_markup(markup) {
+    // Support &amp;, &quot;, &apos;, &lt; and &gt;, escape all other
+    // occurrences of '&'.
+    markup = markup.replace(
+        /&(?!amp;|quot;|apos;|lt;|gt;)/g,
+        '&amp;'
+    );
+    return markup
+}

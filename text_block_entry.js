@@ -506,7 +506,15 @@ const TextBlockEntry = new Lang.Class({
             this.actor.insert_child_below(color_bin, this._entry)
         }
 
-        this._clutter_text.set_markup(markup);
+        markup = Utils.fix_markup(markup);
+
+        try {
+            Pango.parse_markup(markup, -1, '');
+            this._clutter_text.set_markup(markup);
+        }
+        catch(e) {
+            this._clutter_text.set_text(Utils.strip_tags(markup));
+        }
     },
 
     get entry() {
