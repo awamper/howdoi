@@ -30,6 +30,7 @@ const Utils = Me.imports.utils;
 const PrefsKeys = Me.imports.prefs_keys;
 const PopupDialog = Me.imports.popup_dialog;
 const GoogleSuggestions = Me.imports.google_suggestions;
+const SimpleCache = Me.imports.simple_cache;
 
 const TIMEOUT_IDS = {
     SUGGESTIONS: 0
@@ -37,7 +38,8 @@ const TIMEOUT_IDS = {
 
 const CONNECTION_IDS = {
     ENABLE_CALCULATOR: 0,
-    ENABLE_SUGGESTIONS: 0
+    ENABLE_SUGGESTIONS: 0,
+    CACHE_LIMIT: 0
 };
 
 const HIGHLIGHT_MARKUP = {
@@ -171,7 +173,9 @@ const EntrySuggestions = new Lang.Class({
             Lang.bind(this, this._on_text_changed)
         );
 
-        this._cache = new EntrySuggestionsCache();
+        let limit = Utils.SETTINGS.get_int(PrefsKeys.SUGGESTIONS_CACHE_LIMIT);
+        this._cache = new SimpleCache.SimpleCache(limit);
+
         this._suggestions = new GoogleSuggestions.GoogleSuggestions();
         this._suggestion_items = [];
         this._showing = false;
@@ -188,6 +192,15 @@ const EntrySuggestions = new Lang.Class({
             'changed::' + PrefsKeys.ENABLE_SUGGESTIONS,
             Lang.bind(this, function() {
                 this._cache.clear();
+            })
+        );
+        CONNECTION_IDS.CACHE_LIMIT = Utils.SETTINGS.connect(
+            'changed::' + PrefsKeys.SUGGESTIONS_CACHE_LIMIT,
+            Lang.bind(this, function() {
+                let limit = Utils.SETTINGS.get_int(
+                    PrefsKeys.SUGGESTIONS_CACHE_LIMIT
+                );
+                this._cache.limit = limit;
             })
         );
     },
@@ -738,8 +751,10 @@ const EntrySuggestions = new Lang.Class({
 
         Utils.SETTINGS.disconnect(CONNECTION_IDS.ENABLE_CALCULATOR);
         Utils.SETTINGS.disconnect(CONNECTION_IDS.ENABLE_SUGGESTIONS);
+        Utils.SETTINGS.disconnect(CONNECTION_IDS.CACHE_LIMIT);
         CONNECTION_IDS.ENABLE_CALCULATOR = 0;
         CONNECTION_IDS.ENABLE_SUGGESTIONS = 0;
+        CONNECTION_IDS.CACHE_LIMIT = 0;
 
         this.parent();
     },
@@ -749,42 +764,3 @@ const EntrySuggestions = new Lang.Class({
     }
 });
 Signals.addSignalMethods(EntrySuggestions.prototype);
-
-const EntrySuggestionsCache = new Lang.Class({
-    Name: 'HowDoIEntrySuggestionsCache',
-
-    _init: function() {
-        this._items = [];
-    },
-
-    add: function(query, suggestions) {
-        let limit = Utils.SETTINGS.get_int(PrefsKeys.SUGGESTIONS_CACHE_LIMIT);
-        if(this.get(query)) return;
-        if(this._items.length >= limit) this._items.shift();
-        this._items.push({
-            hash: Utils.fnv32a(query),
-            suggestions: JSON.stringify(suggestions)
-        });
-    },
-
-    get: function(query) {
-        let result = false;
-
-        for each(let item in this._items) {
-            if(item.hash === Utils.fnv32a(query)) {
-                result = JSON.parse(item.suggestions);
-                break;
-            }
-        }
-
-        return result;
-    },
-
-    clear: function() {
-        this._items = [];
-    },
-
-    destroy: function() {
-        this.clear();
-    }
-});
