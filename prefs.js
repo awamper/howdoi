@@ -537,6 +537,18 @@ const HowDoIPrefsWidget = new GObject.Class({
         let name = 'Main';
         let page = new PrefsGrid(Utils.SETTINGS);
 
+        let spin_properties = {
+            lower: 10,
+            upper: 1000,
+            step_increment: 10
+        };
+        page.add_spin(
+            'Search history limit:',
+            PrefsKeys.HISTORY_LIMIT,
+            spin_properties,
+            'int'
+        );
+
         let sites = [];
         for (let i = 0; i < StackExchangeSites.LIST.length; i++) {
             sites.push({
