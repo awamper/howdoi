@@ -593,6 +593,15 @@ const HowDoIPrefsWidget = new GObject.Class({
             'int'
         );
 
+        spin_properties.lower = 1;
+        spin_properties.upper = 1000;
+        page.add_spin(
+            'Answers cache limit(0 - to match history limit):',
+            PrefsKeys.ANSWERS_CACHE_LIMIT,
+            spin_properties,
+            'int'
+        );
+
         spin_properties.lower = 100;
         spin_properties.upper = 1000;
         spin_properties.step_increment = 50;
