@@ -499,6 +499,7 @@ const HowDoIPrefsWidget = new GObject.Class({
         this.set_orientation(Gtk.Orientation.VERTICAL);
 
         let main = this._get_main_page();
+        let answers = this._get_answers_page();
         let size = this._get_size_page();
         let keywords = this._get_keywords_page();
         let keybindings = this._get_keybindings_page();
@@ -516,6 +517,7 @@ const HowDoIPrefsWidget = new GObject.Class({
         });
 
         stack.add_titled(main.page, main.name, main.name);
+        stack.add_titled(answers.page, answers.name, answers.name);
         stack.add_titled(size.page, size.name, size.name);
         stack.add_titled(keywords.page, keywords.name, keywords.name);
         stack.add_titled(keybindings.page, keybindings.name, keybindings.name);
@@ -565,6 +567,25 @@ const HowDoIPrefsWidget = new GObject.Class({
             'Use Google search:',
             PrefsKeys.USE_GOOGLE_SEARCH
         );
+
+        return {
+            page: page,
+            name: name
+        };
+    },
+
+    _get_answers_page: function() {
+        let name = 'Answers';
+        let page = new PrefsGrid(Utils.SETTINGS);
+
+        page.add_boolean(
+            'Show question title:',
+            PrefsKeys.QUESTION_TITLE
+        );
+        page.add_boolean(
+            'Hide page indicators:',
+            PrefsKeys.HIDE_PAGE_INDICATORS
+        );
         page.add_separator();
 
         let modes = [];
@@ -601,6 +622,7 @@ const HowDoIPrefsWidget = new GObject.Class({
             spin_properties,
             'int'
         );
+        page.add_separator();
 
         spin_properties.lower = 100;
         spin_properties.upper = 1000;
@@ -610,15 +632,6 @@ const HowDoIPrefsWidget = new GObject.Class({
             PrefsKeys.MAX_IMAGE_SIZE,
             spin_properties,
             'int'
-        );
-
-        page.add_boolean(
-            'Show question title:',
-            PrefsKeys.QUESTION_TITLE
-        );
-        page.add_boolean(
-            'Hide page indicators:',
-            PrefsKeys.HIDE_PAGE_INDICATORS
         );
 
         return {
