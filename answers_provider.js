@@ -24,8 +24,13 @@ const PrefsKeys = Me.imports.prefs_keys;
 const StackExchange = Me.imports.stack_exchange;
 const GoogleSearch = Me.imports.google_search;
 const Answer = Me.imports.answer;
+const SimpleCache = Me.imports.simple_cache;
 
 const QUESTION_ID_REGEXP = /\/questions\/(\d+)\//i;
+
+const CONNECTION_IDS = {
+    CACHE_LIMIT: 0
+};
 
 const AnswersProvider = new Lang.Class({
     Name: 'HowDoIAnswersProvider',
@@ -36,6 +41,22 @@ const AnswersProvider = new Lang.Class({
 
         this._stackexchange = new StackExchange.StackExchange();
         this._google_search = new GoogleSearch.GoogleSearch();
+
+        let limit_key = PrefsKeys.ANSWERS_CACHE_LIMIT;
+        let limit = Utils.SETTINGS.get_int(limit_key);
+        if(limit === 0) {
+            limit_key = PrefsKeys.HISTORY_LIMIT;
+            limit = Utils.SETTINGS.get_int(limit_key);
+        }
+
+        this._cache = new SimpleCache.SimpleCache(limit);
+
+        CONNECTION_IDS.CACHE_LIMIT = Utils.SETTINGS.connect(
+            'changed::' + limit_key,
+            Lang.bind(this, function() {
+                this._cache.limit = Utils.SETTINGS.get_int(limit_key);
+            })
+        );
     },
 
     _get_ids_from_links: function(links) {
@@ -87,6 +108,19 @@ const AnswersProvider = new Lang.Class({
         }
     },
 
+    _load_answers: function(ids, answers) {
+        let result = new Array(ids.length);
+
+        for each(let answer in answers) {
+            let index = ids.indexOf(parseInt(answer.question_id));
+            if(index === -1) continue;
+            result.splice(index, 0, new Answer.Answer(answer));
+        }
+
+        result = result.filter(function(n) { return n !== undefined });
+        return result;
+    },
+
     get_answers: function(query, limit, callback) {
         if(limit === undefined) limit = this._limit;
 
@@ -97,6 +131,16 @@ const AnswersProvider = new Lang.Class({
             let default_site = this._stackexchange.get_site(default_site_id);
             this._google_search.site = default_site.site_url;
             this._stackexchange.site = default_site.api_site_parameter;
+        }
+
+        let cached = this._cache.get(query.trim());
+        if(cached) {
+            let result = this._load_answers(
+                cached.ids,
+                cached.answers
+            );
+            callback(result);
+            return;
         }
 
         this._get_question_ids(query, limit,
@@ -114,13 +158,11 @@ const AnswersProvider = new Lang.Class({
                             return;
                         }
 
-                        let result = new Array(ids.length);
-                        for each(let answer in answers) {
-                            let index = ids.indexOf(parseInt(answer.question_id));
-                            if(index === -1) continue;
-                            result.splice(index, 0, new Answer.Answer(answer));
-                        }
-                        result = result.filter(function(n) { return n !== undefined });
+                        this._cache.add(query.trim(), {
+                            ids: ids,
+                            answers: answers
+                        });
+                        let result = this._load_answers(ids, answers);
                         callback(result);
                     })
                 );
@@ -129,6 +171,10 @@ const AnswersProvider = new Lang.Class({
     },
 
     destroy: function() {
+        Utils.SETTINGS.disconnect(CONNECTION_IDS.CACHE_LIMIT);
+        CONNECTION_IDS.CACHE_LIMIT = 0;
+
+        this._cache.destroy();
         this._stackexchange.destroy();
         this._google_search.destroy();
     },

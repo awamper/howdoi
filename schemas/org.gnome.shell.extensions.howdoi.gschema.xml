@@ -82,5 +82,9 @@
     <key type="i" name="max-image-size">
         <default>500</default>
     </key>
+
+    <key type="i" name="answers-cache-limit">
+        <default>50</default>
+    </key>
   </schema>
 </schemalist>
