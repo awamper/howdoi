@@ -154,6 +154,62 @@ const ImagePreviewer = new Lang.Class({
     }
 });
 
+const CopyButton = new Lang.Class({
+    Name: 'HowDoiTextBlockEntryCopyButton',
+    Extends: Tooltip.Tooltip,
+
+    _init: function(entry) {
+        this.parent();
+        this.actor.destroy_all_children();
+
+        this._entry = entry;
+        this._entry.connect('leave-event',
+            Lang.bind(this, function() {
+                if(!Utils.is_pointer_inside_actor(this.actor)) {
+                    this._entry.clutter_text.set_editable(false);
+                    this.hide();
+                }
+
+                return Clutter.EVENT_PROPAGATE;
+            })
+        );
+        this._entry.clutter_text.connect('key-focus-out',
+            Lang.bind(this, this.hide)
+        );
+
+        this._label = new St.Label();
+        this._button = new St.Button({
+            child: this._label,
+            style_class: 'howdoi-copy-button',
+            reactive: true,
+            track_hover: true
+        });
+        this._button.connect('clicked',
+            Lang.bind(this, function() {
+                this.hide();
+                let selection = this._entry.clutter_text.get_selection();
+                if(Utils.is_blank(selection)) return;
+
+                St.Clipboard.get_default().set_text(
+                    St.ClipboardType.CLIPBOARD,
+                    selection
+                );
+            })
+        );
+
+        this.actor.add_child(this._button);
+    },
+
+    set_markup: function(markup) {
+        this._label.clutter_text.set_markup(markup);
+    },
+
+    destroy: function() {
+        this._entry = null;
+        this.parent();
+    }
+});
+
 const TextBlockEntry = new Lang.Class({
     Name: 'HowDoIAnswerTextBlockEntry',
 
@@ -175,11 +231,8 @@ const TextBlockEntry = new Lang.Class({
         });
         this._entry.connect('leave-event',
             Lang.bind(this, function() {
-                if(!Utils.is_pointer_inside_actor(this._copy_button)) {
-                    this._clutter_text.set_editable(false);
-                    if(this._link_popup) this._link_popup.hide();
-                    this._hide_button();
-                }
+                if(this._link_popup) this._link_popup.hide();
+                if(this._image_previewer) this._image_previewer.hide();
             })
         );
         this._entry.connect('motion-event',
@@ -203,9 +256,6 @@ const TextBlockEntry = new Lang.Class({
         this._clutter_text.connect('cursor-changed',
             Lang.bind(this, this._on_cursor_changed)
         );
-        this._clutter_text.connect('key-focus-out',
-            Lang.bind(this, this._hide_button)
-        );
         this._clutter_text.connect('button-press-event',
             Lang.bind(this, function() {
                 if(this._link_entered) return Clutter.EVENT_PROPAGATE;
@@ -217,26 +267,7 @@ const TextBlockEntry = new Lang.Class({
             Lang.bind(this, this._on_text_button_release_event)
         );
 
-        this._copy_label = new St.Label();
-        this._copy_button = new St.Button({
-            child: this._copy_label,
-            style_class: 'howdoi-copy-button',
-            visible: false
-        });
-        this._copy_button.connect('clicked',
-            Lang.bind(this, function() {
-                this._hide_button();
-                let selection = this._clutter_text.get_selection();
-                if(Utils.is_blank(selection)) return;
-
-                St.Clipboard.get_default().set_text(
-                    St.ClipboardType.CLIPBOARD,
-                    selection
-                );
-            })
-        );
-        Main.uiGroup.add_child(this._copy_button);
-
+        this._copy_button = null;
         this._link_popup = null;
         this._image_previewer = null;
         this._link_entered = null;
@@ -305,7 +336,7 @@ const TextBlockEntry = new Lang.Class({
         let selection = this._clutter_text.get_selection();
 
         if(Utils.is_blank(selection)) {
-            this._hide_button();
+            if(this._copy_button) this._copy_button.hide();
             return Clutter.EVENT_STOP;
         }
 
@@ -321,8 +352,14 @@ const TextBlockEntry = new Lang.Class({
                         selection.length
                     )
                 );
-                this._copy_label.clutter_text.set_markup(label_markup);
-                this._show_button();
+
+                if(this._copy_button === null) {
+                    this._copy_button = new CopyButton(this._entry);
+                }
+
+                this._copy_button.set_markup(label_markup);
+                this._copy_button.show();
+
                 return GLib.SOURCE_REMOVE;
             })
         );
@@ -335,64 +372,6 @@ const TextBlockEntry = new Lang.Class({
             Mainloop.source_remove(TIMEOUT_IDS.SELECTION);
             TIMEOUT_IDS.SELECTION = 0;
         }
-    },
-
-    _show_button: function() {
-        if(this._copy_button.visible) return;
-
-        Main.uiGroup.set_child_above_sibling(this._copy_button, null);
-        let [pointer_x, pointer_y] = global.get_pointer();
-        this._copy_button.translation_x = pointer_x + 5;
-        this._copy_button.translation_y = pointer_y + 5;
-
-        this._copy_button.set_pivot_point(0.5, 1.0);
-        this._copy_button.scale_x = 0.01;
-        this._copy_button.scale_y = 0.05;
-        this._copy_button.show();
-
-        Tweener.removeTweens(this._copy_button);
-        Tweener.addTween(this._copy_button, {
-            time: 0.2,
-            scale_x: 1.1,
-            scale_y: 1.1,
-            transition: 'easeOutQuad',
-            onComplete: Lang.bind(this, function() {
-                Tweener.addTween(this._copy_button, {
-                    time: 0.2,
-                    scale_x: 1,
-                    scale_y: 1,
-                    transition: 'easeOutQuad'
-                });
-            })
-        });
-    },
-
-    _hide_button: function() {
-        if(!this._copy_button.visible) return;
-
-        this._copy_button.set_pivot_point(0.5, 0.5);
-        Tweener.removeTweens(this._copy_button);
-        Tweener.addTween(this._copy_button, {
-            time: 0.1,
-            scale_x: 1.1,
-            scale_y: 1.1,
-            transition: 'easeOutQuad',
-            onComplete: Lang.bind(this, function() {
-                Tweener.addTween(this._copy_button, {
-                    time: 0.2,
-                    opacity: 0,
-                    scale_x: 0,
-                    scale_y: 0,
-                    transition: 'easeOutQuad',
-                    onComplete: Lang.bind(this, function() {
-                        this._copy_button.hide();
-                        this._copy_button.opacity = 255;
-                        this._copy_button.scale_x = 1;
-                        this._copy_button.scale_y = 1;
-                    })
-                });
-            })
-        });
     },
 
     _destroy: function() {
@@ -410,8 +389,11 @@ const TextBlockEntry = new Lang.Class({
             this._link_popup.destroy();
             this._link_popup = null;
         }
+        if(this._copy_button) {
+            this._copy_button.destroy();
+            this._copy_button = null;
+        }
 
-        this._copy_button.destroy();
         this.actor.destroy();
     },
 

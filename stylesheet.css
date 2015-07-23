@@ -199,9 +199,6 @@
 }
 
 .howdoi-copy-button {
-    background-color: rgba(0, 0, 0, 0.8);
-    border: 1px solid black;
-    padding: 5px;
     color: #C4C4C4;
     font-size: 14px;
     font-weight: bold;
