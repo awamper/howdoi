@@ -48,7 +48,7 @@ const PageIndicators = new Lang.Class({
         this._currentPage = undefined;
     },
 
-    animateIndicators: function(animation_direction) {
+    animate_indicators: function(animation_direction) {
         if(!this.actor.mapped) return;
         let children = this.actor.get_children();
         if(children.length == 0) return;
@@ -96,10 +96,6 @@ const PageIndicators = new Lang.Class({
                 delay: is_animation_in ? VIEWS_SWITCH_ANIMATION_DELAY : 0
             });
         }
-    },
-
-    animate_indicators: function(animation_direction) {
-        this.animateIndicators(animation_direction);
     },
 
     destroy: function() {
