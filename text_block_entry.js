@@ -177,7 +177,7 @@ const TextBlockEntry = new Lang.Class({
             Lang.bind(this, function() {
                 if(!Utils.is_pointer_inside_actor(this._copy_button)) {
                     this._clutter_text.set_editable(false);
-                    this._link_popup.hide();
+                    if(this._link_popup) this._link_popup.hide();
                     this._hide_button();
                 }
             })
@@ -237,15 +237,15 @@ const TextBlockEntry = new Lang.Class({
         );
         Main.uiGroup.add_child(this._copy_button);
 
-        this._link_popup = new LinkPopup();
-        this._image_previewer = new ImagePreviewer();
+        this._link_popup = null;
+        this._image_previewer = null;
         this._link_entered = null;
         this._link_maps = [];
 
         this.connect('link-clicked',
             Lang.bind(this, function(sender, link, button) {
-                this._link_popup.hide();
-                this._image_previewer.hide();
+                if(this._link_popup) this._link_popup.hide();
+                if(this._image_previewer) this._image_previewer.hide();
                 if(Utils.is_blank(link.url)) return;
 
                 if(button === Clutter.BUTTON_PRIMARY) {
@@ -268,9 +268,17 @@ const TextBlockEntry = new Lang.Class({
         this.connect('link-enter',
             Lang.bind(this, function(sender, link) {
                 if(link.title === Answer.IMAGE_TITLE) {
+                    if(this._image_previewer === null) {
+                        this._image_previewer = new ImagePreviewer();
+                    }
+
                     this._image_previewer.preview(link.url);
                 }
                 else {
+                    if(this._link_popup === null) {
+                        this._link_popup = new LinkPopup();
+                    }
+
                     this._link_popup.set(link);
                     this._link_popup.show();
                 }
@@ -278,11 +286,11 @@ const TextBlockEntry = new Lang.Class({
         );
         this.connect('link-leave',
             Lang.bind(this, function(sender) {
-                if(this._link_popup.shown) {
+                if(this._link_popup && this._link_popup.shown) {
                     this._link_popup.set(null);
                     this._link_popup.hide();
                 }
-                if(this._image_previewer.shown) {
+                if(this._image_previewer && this._image_previewer.shown) {
                     this._image_previewer.preview(null);
                     this._image_previewer.hide();
                 }
@@ -393,8 +401,16 @@ const TextBlockEntry = new Lang.Class({
         this.actor.text_block = null;
 
         this._remove_timeout();
-        this._image_previewer.destroy();
-        this._link_popup.destroy();
+
+        if(this._image_previewer) {
+            this._image_previewer.destroy();
+            this._image_previewer = null;
+        }
+        if(this._link_popup) {
+            this._link_popup.destroy();
+            this._link_popup = null;
+        }
+
         this._copy_button.destroy();
         this.actor.destroy();
     },
@@ -434,8 +450,13 @@ const TextBlockEntry = new Lang.Class({
         let link = this._find_link_at_coords(event);
 
         if(link !== -1) {
-            if(this._link_popup.shown) this._link_popup.reposition();
-            if(this._image_previewer.shown) this._image_previewer.reposition();
+            if(this._link_popup && this._link_popup.shown) {
+                this._link_popup.reposition();
+            }
+            if(this._image_previewer && this._image_previewer.shown) {
+                this._image_previewer.reposition();
+            }
+
             global.screen.set_cursor(Meta.Cursor.POINTING_HAND);
             if(!this.params.track_links_hover) return Clutter.EVENT_PROPAGATE;
 
