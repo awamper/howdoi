@@ -171,6 +171,7 @@ const SearchEntry = new Lang.Class({
         if(prev) {
             this._entry_suggestions.ignore_change = true;
             this.set_text(prev);
+            this.clutter_text.set_selection_bound(-1);
             return Clutter.EVENT_STOP;
         }
         else {
@@ -184,6 +185,7 @@ const SearchEntry = new Lang.Class({
 
         if(next) {
             this.set_text(next);
+            this.clutter_text.set_selection_bound(-1);
             return Clutter.EVENT_STOP;
         }
         else {
