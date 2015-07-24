@@ -121,9 +121,24 @@ const AnswersProvider = new Lang.Class({
         return result;
     },
 
-    get_cache: function(query) {
+    _get_cache_key: function(keyword, query) {
+        let cache_key = query;
+        if(!Utils.is_blank(keyword)) {
+            cache_key = '%s %s'.format(
+                keyword.trim(),
+                query.trim()
+            );
+        }
+
+        return cache_key;
+    },
+
+    get_cache: function(keyword, query) {
+        if(Utils.is_blank(query)) return false;
+
+        let cache_key = this._get_cache_key(keyword, query);
         let result = false;
-        let cached = this._cache.get(query.trim());
+        let cached = this._cache.get(cache_key);
 
         if(cached) {
             result = this._load_answers(
@@ -135,7 +150,7 @@ const AnswersProvider = new Lang.Class({
         return result;
     },
 
-    get_answers: function(query, limit, no_cache, callback) {
+    get_answers: function(keyword, query, limit, no_cache, callback) {
         if(limit === undefined) limit = this._limit;
 
         if(this.site === null) {
@@ -147,8 +162,9 @@ const AnswersProvider = new Lang.Class({
             this._stackexchange.site = default_site.api_site_parameter;
         }
 
+        let cache_key = this._get_cache_key(keyword, query);
         if(!no_cache) {
-            let cached = this.get_cache(query);
+            let cached = this.get_cache(cache_key);
             if(cached) {
                 callback(cached);
                 return;
@@ -170,7 +186,7 @@ const AnswersProvider = new Lang.Class({
                             return;
                         }
 
-                        this._cache.add(query.trim(), {
+                        this._cache.add(cache_key, {
                             ids: ids,
                             answers: answers
                         });

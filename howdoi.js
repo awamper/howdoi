@@ -310,6 +310,7 @@ const HowDoI = new Lang.Class({
             Lang.bind(this, function() {
                 TIMEOUT_IDS.LOAD_CACHE = 0;
                 let cached = this._answers_provider.get_cache(
+                    this._search_entry.keyword,
                     this._search_entry.query
                 );
                 if(cached) {
@@ -379,7 +380,11 @@ const HowDoI = new Lang.Class({
 
         let no_cache = this._answers_view.cached_label.visible;
         let max_answers = Utils.SETTINGS.get_int(PrefsKeys.MAX_ANSWERS);
-        this._answers_provider.get_answers(query, max_answers, no_cache,
+        this._answers_provider.get_answers(
+            this._search_entry.keyword,
+            query,
+            max_answers,
+            no_cache,
             Lang.bind(this, function(answers, error) {
                 this._progress_bar.stop();
                 this._progress_bar.hide();
