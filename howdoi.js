@@ -20,6 +20,8 @@ const Lang = imports.lang;
 const Clutter = imports.gi.Clutter;
 const Meta = imports.gi.Meta;
 const Shell = imports.gi.Shell;
+const GLib = imports.gi.GLib;
+const Mainloop = imports.mainloop;
 const Signals = imports.signals;
 const Tweener = imports.ui.tweener;
 const Main = imports.ui.main;
@@ -38,7 +40,11 @@ const SiteLogo = Me.imports.site_logo;
 const CONNECTION_IDS = {
     CAPTURED_EVENT: 0
 };
+const TIMEOUT_IDS = {
+    LOAD_CACHE: 0
+};
 
+const CACHE_TIMEOUT = 200;
 const SHOW_ANIMATION_TIME = 0.15;
 const HIDE_ANIMATION_TIME = 0.15;
 
@@ -297,7 +303,25 @@ const HowDoI = new Lang.Class({
     },
 
     _on_entry_text_changed: function() {
-        this._answers_view.clear(true);
+        this._remove_timeout();
+        this._answers_view.clear(false);
+
+        TIMEOUT_IDS.LOAD_CACHE = Mainloop.timeout_add(CACHE_TIMEOUT,
+            Lang.bind(this, function() {
+                TIMEOUT_IDS.LOAD_CACHE = 0;
+                let cached = this._answers_provider.get_cache(
+                    this._search_entry.query
+                );
+                if(cached) {
+                    this._answers_view.set_answers(cached);
+                    this._answers_view.show_label(
+                        this._answers_view.cached_label
+                    );
+                }
+
+                return GLib.SOURCE_REMOVE;
+            })
+        );
 
         if(Utils.is_blank(this._search_entry.text)) {
             this.reset_site();
@@ -353,8 +377,9 @@ const HowDoI = new Lang.Class({
         this._progress_bar.start();
         this._progress_bar.show();
 
+        let no_cache = this._answers_view.cached_label.visible;
         let max_answers = Utils.SETTINGS.get_int(PrefsKeys.MAX_ANSWERS);
-        this._answers_provider.get_answers(query, max_answers,
+        this._answers_provider.get_answers(query, max_answers, no_cache,
             Lang.bind(this, function(answers, error) {
                 this._progress_bar.stop();
                 this._progress_bar.hide();
@@ -487,6 +512,13 @@ const HowDoI = new Lang.Class({
         this.shown = false;
         if(Main._findModal(this.actor) !== -1) Main.popModal(this.actor);
         this._disconnect_captured_event();
+    },
+
+    _remove_timeout: function() {
+        if(TIMEOUT_IDS.LOAD_CACHE > 0) {
+            Mainloop.source_remove(TIMEOUT_IDS.LOAD_CACHE);
+            TIMEOUT_IDS.LOAD_CACHE = 0;
+        }
     },
 
     get_keyword_for_query: function() {
@@ -658,6 +690,7 @@ const HowDoI = new Lang.Class({
     },
 
     destroy: function() {
+        this._remove_timeout();
         Utils.HTTP_CACHE.dump();
         this._disconnect_captured_event();
         this._site_logo.destroy();

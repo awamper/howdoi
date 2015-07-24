@@ -251,6 +251,22 @@ const AnswersView = new Lang.Class({
             y_align: St.Align.END
         });
 
+        this._cached_label = new St.Label({
+            text:'Cached version, press <Enter> to reload',
+            style_class: 'howdoi-cached-label',
+            visible: false
+        });
+        this._table.add(this._cached_label, {
+            row: 0,
+            col: 0,
+            row_span: 2,
+            expand: true,
+            x_fill: false,
+            y_fill: false,
+            x_align: St.Align.START,
+            y_align: St.Align.END
+        });
+
         let copy_code_icon = new St.Icon({
             icon_name: 'edit-copy-symbolic',
             icon_size: 30
@@ -482,8 +498,8 @@ const AnswersView = new Lang.Class({
         }
     },
 
-    _show_label: function(label) {
-        if(label.visible) return;
+    show_label: function(label) {
+        // if(label.visible) return;
 
         label.opacity = 0;
         label.show();
@@ -496,8 +512,8 @@ const AnswersView = new Lang.Class({
         });
     },
 
-    _hide_label: function(label) {
-        if(!label.visible) return;
+    hide_label: function(label) {
+        // if(!label.visible) return;
 
         Tweener.removeTweens(label);
         Tweener.addTween(label, {
@@ -535,11 +551,12 @@ const AnswersView = new Lang.Class({
 
         if(answers === null || answers.length < 1) {
             this._show_icon(ICON_NAMES.NOTHING_FOUND);
-            this._show_label(this._nothing_label);
+            this.show_label(this._nothing_label);
             return;
         }
         else {
-            this._hide_label(this._nothing_label);
+            this.hide_label(this._nothing_label);
+            this.hide_label(this._cached_label);
         }
 
         let prev_n_results = this.n_results;
@@ -573,6 +590,9 @@ const AnswersView = new Lang.Class({
         this._copy_code_btn.hide();
         this._view_mode_btn.hide();
 
+        this.hide_label(this._nothing_label);
+        this.hide_label(this._cached_label);
+
         if(animate_out) {
             this._animation_running = true;
             this._show_icon();
@@ -581,7 +601,6 @@ const AnswersView = new Lang.Class({
             this._page_indicators.animate_indicators(
                 PageIndicators.ANIMATION_DIRECTION.OUT
             );
-            this._hide_label(this._nothing_label);
 
             Tweener.removeTweens(this._scroll_view);
             Tweener.addTween(this._scroll_view, {
@@ -593,7 +612,6 @@ const AnswersView = new Lang.Class({
         }
         else {
             this._show_icon();
-            this._hide_label(this._nothing_label);
             this._clear_animation_done();
         }
     },
@@ -669,6 +687,10 @@ const AnswersView = new Lang.Class({
 
     get view_mode_btn() {
         return this._view_mode_btn;
+    },
+
+    get cached_label() {
+        return this._cached_label;
     }
 });
 Signals.addSignalMethods(AnswersView.prototype);

@@ -135,7 +135,7 @@ const AnswersProvider = new Lang.Class({
         return result;
     },
 
-    get_answers: function(query, limit, callback) {
+    get_answers: function(query, limit, no_cache, callback) {
         if(limit === undefined) limit = this._limit;
 
         if(this.site === null) {
@@ -147,10 +147,12 @@ const AnswersProvider = new Lang.Class({
             this._stackexchange.site = default_site.api_site_parameter;
         }
 
-        let cached = this.get_cache(query);
-        if(cached) {
-            callback(cached);
-            return;
+        if(!no_cache) {
+            let cached = this.get_cache(query);
+            if(cached) {
+                callback(cached);
+                return;
+            }
         }
 
         this._get_question_ids(query, limit,
