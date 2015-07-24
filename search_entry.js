@@ -169,6 +169,11 @@ const SearchEntry = new Lang.Class({
         let prev = this._history.prev();
 
         if(prev) {
+            if(prev === this.text) {
+                this.history_prev();
+                return Clutter.EVENT_PROPAGATE;
+            }
+
             this._entry_suggestions.ignore_change = true;
             this.set_text(prev);
             return Clutter.EVENT_STOP;
