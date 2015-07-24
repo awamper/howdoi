@@ -224,6 +224,10 @@ const SearchEntry = new Lang.Class({
 
     get suggestions() {
         return this._entry_suggestions;
+    },
+
+    get history() {
+        return this._history;
     }
 });
 Signals.addSignalMethods(SearchEntry.prototype);

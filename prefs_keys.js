@@ -36,3 +36,5 @@ const ANSWER_VIEW_MODE = 'answer-view-mode';
 const KEYWORDS = 'keywords';
 const MAX_IMAGE_SIZE = 'max-image-size';
 const ANSWERS_CACHE_LIMIT = 'answers-cache-limit';
+const INDICATOR = 'indicator';
+const RECENT_LIMIT = 'recent-limit';

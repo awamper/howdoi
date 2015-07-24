@@ -537,11 +537,26 @@ const HowDoIPrefsWidget = new GObject.Class({
         let name = 'Main';
         let page = new PrefsGrid(Utils.SETTINGS);
 
+        page.add_boolean(
+            'Indicator',
+            PrefsKeys.INDICATOR
+        );
+
         let spin_properties = {
-            lower: 10,
-            upper: 1000,
-            step_increment: 10
+            lower: 1,
+            upper: 20,
+            step_increment: 1
         };
+        page.add_spin(
+            'Max recent searches:',
+            PrefsKeys.RECENT_LIMIT,
+            spin_properties,
+            'int'
+        );
+
+        spin_properties.lower = 10;
+        spin_properties.upper = 1000;
+        spin_properties.step_increment = 10;
         page.add_spin(
             'Search history limit:',
             PrefsKeys.HISTORY_LIMIT,

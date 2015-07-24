@@ -81,6 +81,11 @@ const HistoryManager = new Lang.Class({
         this.current_index = this._history.length;
     },
 
+    get_last: function(limit=0) {
+        let result = this._history.slice(-limit);
+        return result;
+    },
+
     destroy: function() {
         this._params.settings.disconnect(CONNECTION_IDS.SETTINGS);
         this._params = null;

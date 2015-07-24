@@ -86,5 +86,14 @@
     <key type="i" name="answers-cache-limit">
         <default>50</default>
     </key>
+
+    <key type="b" name="indicator">
+        <default>true</default>
+    </key>
+
+    <key type="i" name="recent-limit">
+        <default>10</default>
+    </key>
+
   </schema>
 </schemalist>

@@ -159,6 +159,7 @@ const HowDoI = new Lang.Class({
             y_align: St.Align.END
         });
 
+        this._ignore_entry_change = false;
         this._shown = false;
         this._keywords = JSON.parse(Utils.SETTINGS.get_string(
             PrefsKeys.KEYWORDS
@@ -304,7 +305,14 @@ const HowDoI = new Lang.Class({
 
     _on_entry_text_changed: function() {
         this._remove_timeout();
+
+        if(this.ignore_change) {
+            this.ignore_change = true;
+            return Clutter.EVENT_PROPAGATE;
+        }
+
         this._answers_view.clear(false);
+        this._set_site_for_text(this._search_entry.text)
 
         TIMEOUT_IDS.LOAD_CACHE = Mainloop.timeout_add(CACHE_TIMEOUT,
             Lang.bind(this, function() {
@@ -324,28 +332,30 @@ const HowDoI = new Lang.Class({
             })
         );
 
-        if(Utils.is_blank(this._search_entry.text)) {
+        return Clutter.EVENT_PROPAGATE;
+    },
+
+    _set_site_for_text: function(text) {
+        if(Utils.is_blank(text)) {
             this.reset_site();
-            return Clutter.EVENT_PROPAGATE;
+            return;
         }
 
-        let keyword = this.get_keyword_for_query(this._search_entry.text);
+        let keyword = this.get_keyword_for_query(text);
         if(!keyword) {
             this.reset_site();
-            return Clutter.EVENT_PROPAGATE;
+            return;
         }
 
         let site_name = this._get_name_for_keyword(keyword);
         if(site_name === -1) {
             this.reset_site();
-            return Clutter.EVENT_PROPAGATE;
+            return;
         }
 
         if(this._current_site.name !== site_name) {
             this.set_site(this._get_site_by_name(site_name));
         }
-
-        return Clutter.EVENT_PROPAGATE;
     },
 
     _get_name_for_keyword: function(keyword) {
@@ -526,13 +536,18 @@ const HowDoI = new Lang.Class({
         }
     },
 
-    get_keyword_for_query: function() {
+    get_keyword_for_query: function(query='') {
+        if(Utils.is_blank(query) && Utils.is_blank(this._search_entry.text)) {
+            return false;
+        }
+
+        query = Utils.is_blank(query) ? this._search_entry.text : query;
         let result = false;
-        let space_index = this._search_entry.text.indexOf(' ');
+        let space_index = query.indexOf(' ');
 
         if(space_index === -1) return result;
 
-        let keyword = this._search_entry.text.slice(0, space_index);
+        let keyword = query.slice(0, space_index);
         keyword = keyword.trim();
 
         let site_name = this._get_name_for_keyword(keyword);
@@ -695,6 +710,24 @@ const HowDoI = new Lang.Class({
         else this.show();
     },
 
+    show_cache_or_search: function() {
+        this._set_site_for_text(this._search_entry.text);
+
+        let cached = this._answers_provider.get_cache(
+            this._search_entry.keyword,
+            this._search_entry.query
+        );
+        if(cached) {
+            this._answers_view.set_answers(cached);
+            this._answers_view.show_label(
+                this._answers_view.cached_label
+            );
+        }
+        else {
+            this._search(this._search_entry.query);
+        }
+    },
+
     destroy: function() {
         this._remove_timeout();
         Utils.HTTP_CACHE.dump();
@@ -715,6 +748,22 @@ const HowDoI = new Lang.Class({
 
     get shown() {
         return this._shown;
+    },
+
+    get search_entry() {
+        return this._search_entry;
+    },
+
+    set ignore_change(ignore) {
+        this._ignore_entry_change = ignore;
+    },
+
+    get ignore_change() {
+        return this._ignore_entry_change;
+    },
+
+    get answers_view() {
+        return this._answers_view;
     }
 });
 Signals.addSignalMethods(HowDoI.prototype);
