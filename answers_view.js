@@ -592,6 +592,8 @@ const AnswersView = new Lang.Class({
             });
         }
         else {
+            this._show_icon();
+            this._hide_label(this._nothing_label);
             this._clear_animation_done();
         }
     },
