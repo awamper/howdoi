@@ -121,6 +121,20 @@ const AnswersProvider = new Lang.Class({
         return result;
     },
 
+    get_cache: function(query) {
+        let result = false;
+        let cached = this._cache.get(query.trim());
+
+        if(cached) {
+            result = this._load_answers(
+                cached.ids,
+                cached.answers
+            );
+        }
+
+        return result;
+    },
+
     get_answers: function(query, limit, callback) {
         if(limit === undefined) limit = this._limit;
 
@@ -133,13 +147,9 @@ const AnswersProvider = new Lang.Class({
             this._stackexchange.site = default_site.api_site_parameter;
         }
 
-        let cached = this._cache.get(query.trim());
+        let cached = this.get_cache(query);
         if(cached) {
-            let result = this._load_answers(
-                cached.ids,
-                cached.answers
-            );
-            callback(result);
+            callback(cached);
             return;
         }
 
