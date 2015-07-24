@@ -20,6 +20,8 @@ const Lang = imports.lang;
 const Signals = imports.signals;
 const Clutter = imports.gi.Clutter;
 const Gtk = imports.gi.Gtk;
+const GLib = imports.gi.GLib;
+const Mainloop = imports.mainloop;
 const Tweener = imports.ui.tweener;
 const ExtensionUtils = imports.misc.extensionUtils;
 
@@ -171,6 +173,7 @@ const AnswersView = new Lang.Class({
         this._answer_views = [];
         this._current_page = 0;
         this._animation_running = false;
+        this._idle_ids = [];
 
         let prev_icon = new St.Icon({
             icon_name: 'go-previous-symbolic'
@@ -404,6 +407,32 @@ const AnswersView = new Lang.Class({
         this.emit('notify::n-results');
     },
 
+    _add: function(answer) {
+        if(this.n_results > 0) {
+            this._idle_ids.push(Mainloop.idle_add(
+                Lang.bind(this, function() {
+                    this._add_answer(answer);
+                    this._idle_ids.pop();
+                    return GLib.SOURCE_REMOVE;
+                })
+            ));
+        }
+        else {
+            this.clear();
+            this._add_answer(answer);
+        }
+    },
+
+    _clear_idle_ids: function() {
+        for each(let id in this._idle_ids) {
+            if(id && id > 0) {
+                Mainloop.source_remove(id);
+            }
+        }
+
+        this._idle_ids = [];
+    },
+
     _clear_animation_done: function() {
         this._animation_running = false;
         this._scroll_view.opacity = 255;
@@ -518,7 +547,7 @@ const AnswersView = new Lang.Class({
 
         for each(let answer_text in answers) {
             if(Utils.is_blank(answer_text)) continue;
-            this._add_answer(answer_text);
+            this._add(answer_text);
         }
 
         this.current_page = 0;
@@ -540,6 +569,7 @@ const AnswersView = new Lang.Class({
     },
 
     clear: function(animate_out=false) {
+        this._clear_idle_ids();
         this._copy_code_btn.hide();
         this._view_mode_btn.hide();
 
