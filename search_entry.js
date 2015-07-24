@@ -83,10 +83,13 @@ const SearchEntry = new Lang.Class({
     },
 
     _on_text_changed: function() {
-        if(this.is_empty()) this._secondary_icon.hide();
-        else this._secondary_icon.show();
-
-        if(this.is_empty()) this._history.reset();
+        if(this.is_empty()) {
+            this._secondary_icon.hide();
+            this._history.reset();
+        }
+        else {
+            this._secondary_icon.show();
+        }
 
         return Clutter.EVENT_STOP;
     },
