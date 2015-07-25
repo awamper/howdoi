@@ -106,22 +106,31 @@ const Indicator = new Lang.Class({
             if(filtered_searches.length >= limit) break;
         }
 
-        for each(let query in filtered_searches) {
-            let markup = this._markup_query(query);
-            let item = new PopupMenu.PopupMenuItem('');
-            item.label.clutter_text.set_markup(markup);
-            item.query = query;
-            item.connect('activate',
-                Lang.bind(this, function() {
-                    Extension.howdoi.ignore_change = true;
-                    Extension.howdoi.search_entry.suggestions.ignore_change = true;
-                    Extension.howdoi.search_entry.set_text(item.query);
-                    Extension.howdoi.answers_view.clear();
-                    Extension.howdoi.show();
-                    Extension.howdoi.show_cache_or_search();
-                })
+        if(filtered_searches.length === 0) {
+            let empty_label = new PopupMenu.PopupMenuItem(
+                'Search history is empty'
             );
-            this.menu.addMenuItem(item);
+            this.menu.addMenuItem(empty_label)
+            empty_label.setSensitive(false);
+        }
+        else {
+            for each(let query in filtered_searches) {
+                let markup = this._markup_query(query);
+                let item = new PopupMenu.PopupMenuItem('');
+                item.label.clutter_text.set_markup(markup);
+                item.query = query;
+                item.connect('activate',
+                    Lang.bind(this, function() {
+                        Extension.howdoi.ignore_change = true;
+                        Extension.howdoi.search_entry.suggestions.ignore_change = true;
+                        Extension.howdoi.search_entry.set_text(item.query);
+                        Extension.howdoi.answers_view.clear();
+                        Extension.howdoi.show();
+                        Extension.howdoi.show_cache_or_search();
+                    })
+                );
+                this.menu.addMenuItem(item);
+            }
         }
 
         let clipboard = St.Clipboard.get_default();
