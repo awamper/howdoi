@@ -215,13 +215,6 @@ const KeywordsWidget = new GObject.Class({
                 }
 
                 new_keyword = new_keyword.trim();
-                if(Utils.is_blank(new_keyword)) {
-                    this._show_message(
-                        'Keyword can\'t be empty.',
-                        Gtk.MessageType.ERROR
-                    );
-                    return;
-                }
                 if(this.has_keyword(new_keyword)) {
                     this._show_message(
                         'Keyword already exist.',
@@ -231,12 +224,19 @@ const KeywordsWidget = new GObject.Class({
                 }
 
                 let site_name = this._store.get_value(iterator, 0);
+                if(Utils.is_blank(new_keyword)) {
+                    this._remove_keyword_for_site(site_name)
+                    new_keyword = '';
+                }
+                else {
+                    this._save_keyword(site_name, new_keyword);
+                }
+
                 this._store.set(
                     iterator,
                     [this._columns.name, this._columns.keyword],
                     [site_name, new_keyword]
                 );
-                this._save_keyword(site_name, new_keyword);
             })
         );
 
@@ -279,6 +279,14 @@ const KeywordsWidget = new GObject.Class({
 
     _save_keyword: function(site_name, keyword) {
         this._keywords[site_name] = keyword;
+        Utils.SETTINGS.set_string(
+            this._settings_key,
+            JSON.stringify(this._keywords)
+        );
+    },
+
+    _remove_keyword_for_site: function(site_name) {
+        delete this._keywords[site_name];
         Utils.SETTINGS.set_string(
             this._settings_key,
             JSON.stringify(this._keywords)
