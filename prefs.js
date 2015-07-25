@@ -423,6 +423,15 @@ const PrefsGrid = new GObject.Class({
         return this.add_row(label, spin_button, true);
     },
 
+    add_button: function(label, callback) {
+        let item = new Gtk.Button({
+            label: label
+        });
+        item.connect('clicked', callback);
+
+        return this.add_item(item);
+    },
+
     add_row: function(text, widget, wrap) {
         let label = new Gtk.Label({
             label: text,
@@ -596,11 +605,16 @@ const HowDoIPrefsWidget = new GObject.Class({
             'Google Calculator:',
             PrefsKeys.ENABLE_CALCULATOR
         );
-        page.add_separator();
-
         page.add_boolean(
             'Use Google search:',
             PrefsKeys.USE_GOOGLE_SEARCH
+        );
+
+        page.add_separator();
+        page.add_button('Clear search history',
+            Lang.bind(this, function() {
+                Utils.SETTINGS.set_strv(PrefsKeys.HISTORY, []);
+            })
         );
 
         return {
