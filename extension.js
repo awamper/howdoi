@@ -36,9 +36,9 @@ function add_keybindings() {
         PrefsKeys.SHOW_HOWDOI,
         Utils.SETTINGS,
         Meta.KeyBindingFlags.NONE,
-        Shell.ActionMode.NORMAL |
-        Shell.ActionMode.MESSAGE_TRAY |
-        Shell.ActionMode.OVERVIEW,
+        Shell.KeyBindingMode.NORMAL |
+        Shell.KeyBindingMode.MESSAGE_TRAY |
+        Shell.KeyBindingMode.OVERVIEW,
         Lang.bind(this, function() {
             howdoi.toggle();
         })

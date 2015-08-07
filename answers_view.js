@@ -76,9 +76,11 @@ const AnswersView = new Lang.Class({
             y_fill: true
         });
         this._scroll_view.set_policy(
-            Gtk.PolicyType.EXTERNAL,
-            Gtk.PolicyType.EXTERNAL
+            Gtk.PolicyType.AUTOMATIC,
+            Gtk.PolicyType.AUTOMATIC
         );
+        this._scroll_view.vscroll.hide();
+        this._scroll_view.hscroll.hide();
 
         this._table = new St.Table({
             homogeneous: false

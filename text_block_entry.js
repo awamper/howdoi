@@ -73,9 +73,7 @@ const SpinnerBox = new Lang.Class({
             text: 'Loading...'
         });
 
-        let spinner_icon = Gio.File.new_for_uri(
-            'resource:///org/gnome/shell/theme/process-working.svg'
-        );
+        let spinner_icon = global.datadir + '/theme/process-working.svg';
         this._spinner = new Animation.AnimatedIcon(spinner_icon, 24);
 
         this.actor.add_child(this._spinner.actor);
@@ -122,13 +120,12 @@ const ImagePreviewer = new Lang.Class({
         this.show();
 
         let max_size = Utils.SETTINGS.get_int(PrefsKeys.MAX_IMAGE_SIZE);
-        let image_file = Gio.file_new_for_uri(uri);
         let texture_cache = St.TextureCache.get_default();
         let scale_factor = St.ThemeContext.get_for_stage(
             global.stage
         ).scale_factor;
-        let image = texture_cache.load_file_async(
-            image_file,
+        let image = texture_cache.load_uri_async(
+            uri,
             max_size,
             max_size,
             scale_factor

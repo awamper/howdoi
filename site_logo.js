@@ -65,8 +65,8 @@ const SiteLogo = new Lang.Class({
 
         this._scroll = new St.ScrollView();
         this._scroll.set_policy(
-            Gtk.PolicyType.EXTERNAL,
-            Gtk.PolicyType.EXTERNAL
+            Gtk.PolicyType.NEVER,
+            Gtk.PolicyType.NEVER
         );
         this._scroll.add_actor(box);
 
