@@ -52,10 +52,10 @@ const HowDoI = new Lang.Class({
     Name: 'HowDoI',
 
     _init: function() {
-        this.actor = new St.Table({
+        this.actor = new St.Widget({
             style_class: 'howdoi-main-box',
             visible: false,
-            homogeneous: false
+            layout_manager: new Clutter.TableLayout()
         });
         this.actor.set_pivot_point(0.5, 0.5);
         this.actor.connect(
@@ -81,32 +81,14 @@ const HowDoI = new Lang.Class({
             Lang.bind(this, this._on_entry_key_press_event)
         );
         this._search_entry.actor.hide();
-        this.actor.add(this._search_entry.actor, {
-            row: 0,
-            col: 0,
-            x_expand: false,
-            y_expand: false,
-            x_fill: true,
-            y_fill: false,
-            x_align: St.Align.MIDDLE,
-            y_align: St.Align.START
-        });
+        this.actor.layout_manager.pack(this._search_entry.actor, 0, 0);
 
         this._progress_bar = new ProgressBar.ProgressBar({
             box_style_class: 'howdoi-progress-bar-box',
             progress_style_class: 'howdoi-progress-bar',
         });
         this._progress_bar.hide();
-        this.actor.add(this._progress_bar.actor, {
-            row: 0,
-            col: 0,
-            x_expand: true,
-            y_expand: false,
-            x_fill: false,
-            y_fill: false,
-            x_align: St.Align.MIDDLE,
-            y_align: St.Align.START
-        });
+        this.actor.layout_manager.pack(this._progress_bar.actor, 0, 0);
 
         this._answers_view = new AnswersView.AnswersView();
         this._answers_view.page_indicators.connect(
@@ -115,16 +97,7 @@ const HowDoI = new Lang.Class({
                 this._search_entry.grab_key_focus(true);
             })
         );
-        this.actor.add(this._answers_view.actor, {
-            row: 1,
-            col: 0,
-            x_expand: true,
-            y_expand: true,
-            x_fill: true,
-            y_fill: true,
-            x_align: St.Align.MIDDLE,
-            y_align: St.Align.MIDDLE
-        });
+        this.actor.layout_manager.pack(this._answers_view.actor, 0, 1);
 
         this._background_actor = new St.BoxLayout({
             style_class: 'howdoi-background'

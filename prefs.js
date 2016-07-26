@@ -345,8 +345,9 @@ const PrefsGrid = new GObject.Class({
 
     add_boolean: function(text, key) {
         let item = new Gtk.Switch({
-            active: this._settings.get_boolean(key)
+            active: this._settings.get_boolean(key),
         });
+        item.set_halign(Gtk.Align.END);
         this._settings.bind(key, item, 'active', Gio.SettingsBindFlags.DEFAULT);
 
         return this.add_row(text, item);

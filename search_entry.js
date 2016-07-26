@@ -38,6 +38,10 @@ const SearchEntry = new Lang.Class({
             track_hover: true,
             can_focus: true
         });
+        this.actor.set_x_align(Clutter.ActorAlign.FILL);
+        this.actor.set_y_align(Clutter.ActorAlign.START);
+        this.actor.set_x_expand(false);
+        this.actor.set_y_expand(false);
         this.actor.clutter_text.connect(
             'text-changed',
             Lang.bind(this, this._on_text_changed)

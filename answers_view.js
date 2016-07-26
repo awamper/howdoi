@@ -56,11 +56,13 @@ const AnswersView = new Lang.Class({
 
     _init: function() {
         this.actor = new St.BoxLayout({
-            x_expand: true,
-            y_expand: true,
             vertical: true,
             reactive: true
         });
+        this.actor.set_x_align(Clutter.ActorAlign.FILL);
+        this.actor.set_y_align(Clutter.ActorAlign.FILL);
+        this.actor.set_x_expand(true);
+        this.actor.set_y_expand(true);
         this.actor.connect('scroll-event',
             Lang.bind(this, this._on_scroll)
         );
@@ -80,13 +82,10 @@ const AnswersView = new Lang.Class({
             Gtk.PolicyType.EXTERNAL
         );
 
-        this._table = new St.Table({
-            homogeneous: false
+        this._table = new St.Widget({
+            layout_manager: new Clutter.TableLayout()
         });
-        this._table.add(this._scroll_view, {
-            row: 0,
-            col: 0
-        })
+        this._table.layout_manager.pack(this._scroll_view, 0, 0)
         this.actor.add(this._table, {
             expand: true,
             x_fill: true,
@@ -162,10 +161,7 @@ const AnswersView = new Lang.Class({
         );
 
         if(!Utils.SETTINGS.get_boolean(PrefsKeys.HIDE_PAGE_INDICATORS)) {
-            this._table.add(this._page_indicators.actor, {
-                row: 1,
-                col: 0
-            });
+            this._table.layout_manager.pack(this._page_indicators.actor, 0, 1);
         }
 
         this._adjustment = this._scroll_view.hscroll.adjustment;
@@ -183,19 +179,14 @@ const AnswersView = new Lang.Class({
             style_class: 'howdoi-next-page-button',
             visible: false
         });
+        this._prev_btn.set_x_align(Clutter.ActorAlign.START);
+        this._prev_btn.set_y_align(Clutter.ActorAlign.CENTER);
+        this._prev_btn.set_x_expand(true);
+        this._prev_btn.set_y_expand(true);
         this._prev_btn.connect('clicked',
             Lang.bind(this, this.prev_page)
         );
-        this._table.add(this._prev_btn, {
-            row: 0,
-            col: 0,
-            row_span: 2,
-            expand: true,
-            x_fill: false,
-            y_fill: false,
-            x_align: St.Align.START,
-            y_align: St.Align.MIDDLE
-        });
+        this._table.layout_manager.pack(this._prev_btn, 0, 0);
 
         let next_icon = new St.Icon({
             icon_name: 'go-next-symbolic'
@@ -205,67 +196,47 @@ const AnswersView = new Lang.Class({
             style_class: 'howdoi-prev-page-button',
             visible: false
         });
+        this._next_btn.set_x_align(Clutter.ActorAlign.END);
+        this._next_btn.set_y_align(Clutter.ActorAlign.CENTER);
+        this._next_btn.set_x_expand(true);
+        this._next_btn.set_y_expand(true);
         this._next_btn.connect('clicked',
             Lang.bind(this, this.next_page)
         );
-        this._table.add(this._next_btn, {
-            row: 0,
-            col: 0,
-            row_span: 2,
-            expand: true,
-            x_fill: false,
-            y_fill: false,
-            x_align: St.Align.END,
-            y_align: St.Align.MIDDLE
-        });
+        this._table.layout_manager.pack(this._next_btn, 0, 0);
 
         this._background_icon = new St.Icon({
             icon_name: ICON_NAMES.DEFAULT,
             style_class: 'howdoi-answers-view-icon',
             opacity: ICON_MAX_OPACITY
         });
-        this._table.add(this._background_icon, {
-            row: 0,
-            col: 0,
-            row_span: 2,
-            expand: true,
-            x_fill: false,
-            y_fill: false,
-            x_align: St.Align.MIDDLE,
-            y_align: St.Align.MIDDLE
-        });
+        this._background_icon.set_x_align(Clutter.ActorAlign.CENTER);
+        this._background_icon.set_y_align(Clutter.ActorAlign.CENTER);
+        this._background_icon.set_x_expand(true);
+        this._background_icon.set_y_expand(true);
+        this._table.layout_manager.pack(this._background_icon, 0, 0);
 
         this._nothing_label = new St.Label({
             text: 'Sorry, couldn\'t find any help with that topic',
             style_class: 'howdoi-nothing-label',
             visible: false
         })
-        this._table.add(this._nothing_label, {
-            row: 0,
-            col: 0,
-            row_span: 2,
-            expand: true,
-            x_fill: false,
-            y_fill: false,
-            x_align: St.Align.MIDDLE,
-            y_align: St.Align.END
-        });
+        this._nothing_label.set_x_align(Clutter.ActorAlign.CENTER);
+        this._nothing_label.set_y_align(Clutter.ActorAlign.END);
+        this._nothing_label.set_x_expand(false);
+        this._nothing_label.set_y_expand(false);
+        this._table.layout_manager.pack(this._nothing_label, 0, 0);
 
         this._cached_label = new St.Label({
             text:'Cached version, press <Enter> to reload',
             style_class: 'howdoi-cached-label',
             visible: false
         });
-        this._table.add(this._cached_label, {
-            row: 0,
-            col: 0,
-            row_span: 2,
-            expand: true,
-            x_fill: false,
-            y_fill: false,
-            x_align: St.Align.START,
-            y_align: St.Align.END
-        });
+        this._cached_label.set_x_align(Clutter.ActorAlign.START);
+        this._cached_label.set_y_align(Clutter.ActorAlign.END);
+        this._cached_label.set_x_expand(true);
+        this._cached_label.set_y_expand(true);
+        this._table.layout_manager.pack(this._cached_label, 0, 0);
 
         let copy_code_icon = new St.Icon({
             icon_name: 'edit-copy-symbolic',
@@ -307,18 +278,13 @@ const AnswersView = new Lang.Class({
         let button_box = new St.BoxLayout({
             vertical: true
         });
+        button_box.set_x_align(Clutter.ActorAlign.END);
+        button_box.set_y_align(Clutter.ActorAlign.START);
+        button_box.set_x_expand(true);
+        button_box.set_y_expand(true);
         button_box.add_child(this._copy_code_btn);
         button_box.add_child(this._view_mode_btn);
-        this._table.add(button_box, {
-            row: 0,
-            col: 0,
-            row_span: 2,
-            expand: true,
-            x_fill: false,
-            y_fill: false,
-            x_align: St.Align.END,
-            y_align: St.Align.START
-        });
+        this._table.layout_manager.pack(button_box, 0, 0);
 
         this._resize_icons();
         this._resize_label();

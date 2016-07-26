@@ -20,6 +20,7 @@ const Lang = imports.lang;
 const GLib = imports.gi.GLib;
 const Mainloop = imports.mainloop;
 const Params = imports.misc.params;
+const Clutter = imports.gi.Clutter;
 const Tweener = imports.ui.tweener;
 const ExtensionUtils = imports.misc.extensionUtils;
 
@@ -39,10 +40,14 @@ const ProgressBar = new Lang.Class({
             pulse_mode: false
         });
 
-        this.actor = new St.Table({
+        this.actor = new St.Widget({
             style_class: this._params.box_style_class,
-            homogeneous: false
+            layout_manager: new Clutter.TableLayout()
         });
+        this.actor.set_x_align(Clutter.ActorAlign.CENTER);
+        this.actor.set_y_align(Clutter.ActorAlign.START);
+        this.actor.set_x_expand(true);
+        this.actor.set_y_expand(false);
 
         this._pulse_mode = this._params.pulse_mode;
         this._pulse_step = 1;
@@ -57,17 +62,12 @@ const ProgressBar = new Lang.Class({
         this._progress_bar = new St.BoxLayout({
             style_class: this._params.progress_style_class
         });
+        this._progress_bar.set_x_align(Clutter.ActorAlign.START);
+        this._progress_bar.set_y_align(Clutter.ActorAlign.FILL);
+        this._progress_bar.set_x_expand(true);
+        this._progress_bar.set_y_expand(false);
 
-        this.actor.add(this._progress_bar, {
-            row: 0,
-            col: 0,
-            expand: true,
-            x_fill: false,
-            y_fill: true,
-            x_align: St.Align.START,
-            y_align: St.Align.MIDDLE
-        });
-
+        this.actor.layout_manager.pack(this._progress_bar, 0, 0);
         this.reset();
     },
 
