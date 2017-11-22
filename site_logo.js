@@ -37,7 +37,7 @@ const MIN_SCALE = 0.9;
 const MAX_DESATURATE = 0.7;
 const LABEL_MIN_OPACITY = 150;
 
-const SiteLogo = new Lang.Class({
+var SiteLogo = new Lang.Class({
     Name: 'HowDoISiteLogo',
 
     _init: function(site_info) {

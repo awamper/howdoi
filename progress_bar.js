@@ -29,7 +29,7 @@ const Utils = Me.imports.utils;
 
 const PULSE_TIMEOUT_MS = 30;
 
-const ProgressBar = new Lang.Class({
+var ProgressBar = new Lang.Class({
     Name: 'HowDoIProgressBar',
 
     _init: function(params) {

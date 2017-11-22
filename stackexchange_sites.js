@@ -1,4 +1,4 @@
-const LIST = [
+var LIST = [
     {
       "launch_date": 1221436800,
       "high_resolution_icon_url": "http://cdn.sstatic.net/stackoverflow/img/apple-touch-icon@2.png",

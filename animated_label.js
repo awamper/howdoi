@@ -29,7 +29,7 @@ const MIN_OPACITY = 0;
 const ANIMATION_TIME = 0.4;
 const ANIMATION_DELAY = 0.9;
 
-const AnimatedLabel = new Lang.Class({
+var AnimatedLabel = new Lang.Class({
     Name: 'HowDoIAnimatedLabel',
     Extends: PopupDialog.PopupDialog,
 

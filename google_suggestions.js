@@ -23,13 +23,13 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const PrefsKeys = Me.imports.prefs_keys;
 
-const SUGGESTION_TYPE = {
+var SUGGESTION_TYPE = {
     QUERY: 'QUERY',
     NAVIGATION: 'NAVIGATION',
     CALCULATOR: 'CALCULATOR'
 };
 
-const GoogleSuggestions = new Lang.Class({
+var GoogleSuggestions = new Lang.Class({
     Name: 'GoogleSuggestions',
 
     _init: function() {

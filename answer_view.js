@@ -34,7 +34,7 @@ const Constants = Me.imports.constants;
 const Tooltip = Me.imports.tooltip;
 const AnimatedLabel = Me.imports.animated_label;
 
-const QuestionTitle = new Lang.Class({
+var QuestionTitle = new Lang.Class({
     Name: 'HowDoIQuestionTitle',
 
     _init: function(answer) {
@@ -112,7 +112,7 @@ const QuestionTitle = new Lang.Class({
     }
 });
 
-const CopyBlockButton = new Lang.Class({
+var CopyBlockButton = new Lang.Class({
     Name: 'HowDoIAnswerCopyBlockButton',
 
     _init: function(answer_view, text_block_entry) {
@@ -219,7 +219,7 @@ const CopyBlockButton = new Lang.Class({
     }
 });
 
-const AnswerView = new Lang.Class({
+var AnswerView = new Lang.Class({
     Name: 'HowDoIAnswerView',
 
     _init: function(answer) {

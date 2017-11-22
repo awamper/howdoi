@@ -21,7 +21,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 
-const SimpleCache = new Lang.Class({
+var SimpleCache = new Lang.Class({
     Name: 'HowDoISimpleCache',
 
     _init: function(limit) {

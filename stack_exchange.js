@@ -39,7 +39,7 @@ const API_SEARCH = (
     '&pagesize=5&order=desc&sort=relevance&accepted=True&site=%s&q=%s'
 );
 
-const StackExchange = new Lang.Class({
+var StackExchange = new Lang.Class({
     Name: 'HowDoIStackExchange',
 
     _init: function() {

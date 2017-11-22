@@ -47,7 +47,7 @@ const HIGHLIGHT_MARKUP = {
     STOP: '</span>'
 };
 
-const EntrySuggestionItem = new Lang.Class({
+var EntrySuggestionItem = new Lang.Class({
     Name: 'HowDoIEntrySuggestionItem',
 
     _init: function(suggestion, reactive) {
@@ -135,7 +135,7 @@ const EntrySuggestionItem = new Lang.Class({
 });
 Signals.addSignalMethods(EntrySuggestionItem.prototype);
 
-const DummyEntrySuggestionItem = new Lang.Class({
+var DummyEntrySuggestionItem = new Lang.Class({
     Name: 'HowDoIEntrySuggestionDummyItem',
     Extends: EntrySuggestionItem,
 
@@ -148,7 +148,7 @@ const DummyEntrySuggestionItem = new Lang.Class({
     }
 });
 
-const EntrySuggestions = new Lang.Class({
+var EntrySuggestions = new Lang.Class({
     Name: 'HowDoIEntrySuggestions',
     Extends: PopupDialog.PopupDialog,
 

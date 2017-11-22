@@ -51,7 +51,7 @@ const LABEL_ANIMATION_TIME = 0.3;
 const LABEL_MAX_FONT_SIZE = 50;
 const LABEL_MIN_FONT_SIZE = 10;
 
-const AnswersView = new Lang.Class({
+var AnswersView = new Lang.Class({
     Name: 'HowDoIAnswersView',
 
     _init: function() {

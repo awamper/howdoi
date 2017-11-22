@@ -22,7 +22,8 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const PopupDialog = Me.imports.popup_dialog;
 
-const Tooltip = new Lang.Class({
+
+var Tooltip = new Lang.Class({
     Name: 'HowDoIAnswerTooltip',
     Extends: PopupDialog.PopupDialog,
 

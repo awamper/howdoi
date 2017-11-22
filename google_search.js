@@ -25,7 +25,7 @@ const Utils = Me.imports.utils;
 const LINK_REGEXP = /<h3 class="r"><a href="([\s\S]*?)"[\s\S]*?<\/a>/ig;
 const SEARCH_URL = 'https://www.google.com/search?q=site:%s %s';
 
-const GoogleSearch = new Lang.Class({
+var GoogleSearch = new Lang.Class({
     Name: 'HowDoIGoogleSearch',
 
     _init: function() {

@@ -21,20 +21,20 @@ const Clutter = imports.gi.Clutter;
 const Tweener = imports.ui.tweener;
 const AppDisplay = imports.ui.appDisplay;
 
-const ANIMATION_DIRECTION = {
+var ANIMATION_DIRECTION = {
     IN: 0,
     OUT: 1
 };
 
-const INDICATORS_BASE_TIME = 0.25;
-const INDICATORS_ANIMATION_DELAY = 0.125;
-const INDICATORS_ANIMATION_MAX_TIME = 0.75;
-const INDICATORS_BASE_TIME_OUT = 0.125;
-const INDICATORS_ANIMATION_DELAY_OUT = 0.0625;
-const INDICATORS_ANIMATION_MAX_TIME_OUT = INDICATORS_ANIMATION_MAX_TIME;
-const VIEWS_SWITCH_ANIMATION_DELAY = 0.1;
+var INDICATORS_BASE_TIME = 0.25;
+var INDICATORS_ANIMATION_DELAY = 0.125;
+var INDICATORS_ANIMATION_MAX_TIME = 0.75;
+var INDICATORS_BASE_TIME_OUT = 0.125;
+var INDICATORS_ANIMATION_DELAY_OUT = 0.0625;
+var INDICATORS_ANIMATION_MAX_TIME_OUT = INDICATORS_ANIMATION_MAX_TIME;
+var VIEWS_SWITCH_ANIMATION_DELAY = 0.1;
 
-const PageIndicators = new Lang.Class({
+var PageIndicators = new Lang.Class({
     Name: 'HowDoIPageIndicators',
     Extends: AppDisplay.PageIndicators,
 

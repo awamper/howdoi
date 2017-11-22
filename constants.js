@@ -15,12 +15,12 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-const ANSWER_VIEW_MODE = {
+var ANSWER_VIEW_MODE = {
     FIRST_CODE: 0,
     ONLY_CODE: 1,
     ALL: 2
 };
-const ANSWER_VIEW_MODE_NAME = [
+var ANSWER_VIEW_MODE_NAME = [
     'First code block',
     'Only code',
     'Whole answer'

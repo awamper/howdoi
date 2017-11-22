@@ -28,7 +28,7 @@ const EntrySuggestions = Me.imports.entry_suggestions;
 const HistoryManager = Me.imports.history_manager;
 const Extension = Me.imports.extension;
 
-const SearchEntry = new Lang.Class({
+var SearchEntry = new Lang.Class({
     Name: 'HowDoISeachEntry',
 
     _init: function() {

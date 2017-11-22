@@ -28,7 +28,8 @@ const Utils = Me.imports.utils;
 const PrefsKeys = Me.imports.prefs_keys;
 const Extension = Me.imports.extension;
 
-const Indicator = new Lang.Class({
+
+var Indicator = new Lang.Class({
     Name: 'HowDoIIndicator',
     Extends: PanelMenu.Button,
 

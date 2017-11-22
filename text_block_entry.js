@@ -42,15 +42,15 @@ const COPY_SELECTION_TIMEOUT_MS = 400;
 const TIMEOUT_IDS = {
     SELECTION: 0
 };
-const LINK_TOOLTIP_MARKUP = (
+var LINK_TOOLTIP_MARKUP = (
     '<b>%s</b>\n' +
     '<small><i>Left-click to open url in the browser</i></small>\n' +
     '<small><i>Right-click to copy url to the clipboard</i></small>'
 );
 
-const LINKS_REGEXP = /\[a href="(.*?)"\](.*?)\[\/a\]/gi;
+var LINKS_REGEXP = /\[a href="(.*?)"\](.*?)\[\/a\]/gi;
 
-const LinkPopup = new Lang.Class({
+var LinkPopup = new Lang.Class({
     Name: 'HowDoIAnswerLinkPopup',
     Extends: Tooltip.Tooltip,
 
@@ -63,7 +63,7 @@ const LinkPopup = new Lang.Class({
     }
 });
 
-const SpinnerBox = new Lang.Class({
+var SpinnerBox = new Lang.Class({
     Name: 'HowDoISpinnerBox',
 
     _init: function() {
@@ -98,7 +98,7 @@ const SpinnerBox = new Lang.Class({
     }
 });
 
-const ImagePreviewer = new Lang.Class({
+var ImagePreviewer = new Lang.Class({
     Name: 'HowDoIImagePreviewer',
     Extends: Tooltip.Tooltip,
 
@@ -154,7 +154,7 @@ const ImagePreviewer = new Lang.Class({
     }
 });
 
-const CopyButton = new Lang.Class({
+var CopyButton = new Lang.Class({
     Name: 'HowDoiTextBlockEntryCopyButton',
     Extends: Tooltip.Tooltip,
 
@@ -210,7 +210,7 @@ const CopyButton = new Lang.Class({
     }
 });
 
-const TextBlockEntry = new Lang.Class({
+var TextBlockEntry = new Lang.Class({
     Name: 'HowDoIAnswerTextBlockEntry',
 
     _init: function(text_block, params) {

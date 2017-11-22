@@ -37,18 +37,19 @@ const ProgressBar = Me.imports.progress_bar;
 const StackExchangeSites = Me.imports.stackexchange_sites;
 const SiteLogo = Me.imports.site_logo;
 
-const CONNECTION_IDS = {
+var CONNECTION_IDS = {
     CAPTURED_EVENT: 0
 };
-const TIMEOUT_IDS = {
+var TIMEOUT_IDS = {
     LOAD_CACHE: 0
 };
 
-const CACHE_TIMEOUT = 200;
-const SHOW_ANIMATION_TIME = 0.15;
-const HIDE_ANIMATION_TIME = 0.15;
+var CACHE_TIMEOUT = 200;
+var SHOW_ANIMATION_TIME = 0.15;
+var HIDE_ANIMATION_TIME = 0.15;
 
-const HowDoI = new Lang.Class({
+
+var HowDoI = new Lang.Class({
     Name: 'HowDoI',
 
     _init: function() {

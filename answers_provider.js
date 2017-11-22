@@ -32,7 +32,7 @@ const CONNECTION_IDS = {
     CACHE_LIMIT: 0
 };
 
-const AnswersProvider = new Lang.Class({
+var AnswersProvider = new Lang.Class({
     Name: 'HowDoIAnswersProvider',
 
     _init: function() {

@@ -23,24 +23,24 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 
-const BLOCK_TYPE = {
+var BLOCK_TYPE = {
     TEXT: 0,
     CODE: 1,
     BLOCKQUOTE: 2
 };
-const ALLOWED_TAGS = (
+var ALLOWED_TAGS = (
     '<b><big><i><s><sub><sup><small><tt><u>' +
     '<em><strong><li><a><h1><h2><h3><img>'
 );
-const BLOCK_REGEXP =
+var BLOCK_REGEXP =
     /(<code>)([\s\S]+?)<\/code>|(<blockquote>)([\s\S]+?)<\/blockquote>/ig;
-const LINKS_REGEXP =
+var LINKS_REGEXP =
     /(?:<a href="(.*?)".*?>(.*?)<\/a>)|(?:<img src="(.*?)".*?>)/gi;
-const IMAGE_TITLE = '[IMAGE, hover to see]';
+var IMAGE_TITLE = '[IMAGE, hover to see]';
 
-const LIST_ITEM_SYMBOL = '\u2022';
+var LIST_ITEM_SYMBOL = '\u2022';
 
-const Answer = new Lang.Class({
+var Answer = new Lang.Class({
     Name: 'HowDoIAnswer',
 
     _init: function(data) {
