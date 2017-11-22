@@ -2,7 +2,7 @@
   "description":  "Search http://stackexchange.com sites\nInspired by https://github.com/gleitz/howdoi\n\nPress <F4> to toggle dialog\n<Ctrl>V - paste from clipboard and start search\n<Ctrl><Left>/<Right> - prev/next answer\n<Ctrl><Up>/<Down> - scrolling\n<Ctrl>S - switch view mode (only code/whole answer)\n<Ctrl><Shift>C - copy code to the clipboard\n<Ctrl><Alt>C - copy only first code block to the clipboard",
   "name": "HowDoI",
   "shell-version": [
-    "3.24"
+    "3.26"
   ],
   "url": "https://github.com/awamper/howdoi",
   "uuid": "howdoi@awamper.gmail.com",
